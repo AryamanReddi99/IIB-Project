@@ -25,16 +25,16 @@ Fig 2. Q-learner playing a random player with tuned hyperparameters. Model learn
 ## Q-learner vs Perfect Player
 
 <p align="center">
-<img src="">  
+<img src="https://github.com/AryamanReddi99/IIB-Project/blob/master/Images/vs_perfect_player_short.png?raw=true">  
 </p>
 <p align="center">
 Fig 3. Q-learned quickly learns optimal policy when facing a perfect opponent.
 </p>
 
 <p align="center">
-<img src="https://github.com/AryamanReddi99/IIB-Project/blob/master/Images/vs_perfect_player.png?raw=true">  
+<img src="https://github.com/AryamanReddi99/IIB-Project/blob/master/Images/vs_perfect_player_long.png?raw=true">  
 </p>
 <p align="center">
-Fig 2. Unlike when facing the random player, Q-learner eventually learns optimal policy for very long games (n = 400) when facing a perfect opponent.
+Fig 2. Unlike when facing the random player, Q-learner eventually learns optimal policy for very long games (n ~ 400) when facing a perfect opponent.
 </p>
 
