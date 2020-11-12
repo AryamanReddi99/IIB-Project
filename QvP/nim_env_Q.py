@@ -1,11 +1,10 @@
 import random
 import numpy as np
-from nim import *
-from nim_players import *
+from nim_programmed_players import *
 
 class nim_env_Q():
-    def __init__(self,i,n, first_player = "agent"):
-        self.random_player=random_player()
+    def __init__(self,i,n,opponent,first_player = "agent"):
+        self.opponent=opponent
         self.i = i
         self.n = n
         self.tot = 0
@@ -23,10 +22,10 @@ class nim_env_Q():
         self.tot=0
         # make random player start
         if self.first_player == "opponent":
-            self.tot += self.random_player.play(self.i,self.n,self.tot,self.player_flag) 
+            self.tot += self.opponent.play(self.i,self.n,self.tot,self.player_flag) 
         elif self.first_player == "random":
             if random.random > 0.5:
-                self.tot += self.random_player.play(self.i,self.n,self.tot,self.player_flag) 
+                self.tot += self.opponent.play(self.i,self.n,self.tot,self.player_flag) 
         self.player_flag=1
         return self.tot
     def update_state(self):
@@ -47,7 +46,7 @@ class nim_env_Q():
             self.done=True
             return self.tot, reward, self.done
         # opponent's move
-        self.tot += self.random_player.play(self.i,self.n,self.tot,self.player_flag)
+        self.tot += self.opponent.play(self.i,self.n,self.tot,self.player_flag)
         self.player_flag=1
         if self.tot<=self.n:
             reward = 0
