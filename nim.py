@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from nim_players import *
+from nim_programmed_players import *
 from scipy.stats import norm
 
 class game():
@@ -14,15 +14,15 @@ class game():
         self.tot = 0
         self.player_flag = 1
 
-    def get_move(self,player,env_move):
+    def get_move(self,player,opts=None):
         # get a move from a player and check validity
         try:    
-            int_input = int(player.play(self.i,self.lim,self.tot,self.player_flag,env_move))
+            int_input = int(player.play(self.i,self.lim,self.tot,self.player_flag))
         except:
             print("\n")
             print("WARNING: Input must be a number.")
             print("\n")
-            int_input = self.get_move(self.player_1)
+            int_input = self.get_move(self.player_1,opts)
         if int_input > self.i:
             print("\n")
             print(f"WARNING: Input must be between 1 - {i}.")
@@ -35,10 +35,10 @@ class game():
     def play_turn(self):
         # allow player to play and switch player flag
         if self.player_flag==1:
-            num = self.get_move(self.player_1,env_move=None)
+            num = self.get_move(self.player_1)
             self.player_flag=2
         else:
-            num = self.get_move(self.player_2,env_move=None)
+            num = self.get_move(self.player_2)
             self.player_flag=1
         return num
 
@@ -92,14 +92,19 @@ class game():
             self.tot = 0
             self.player_flag = 1
 
-# a = random_player()
-# b = random_player()
+a = scalable_player(1)
+b = scalable_player(1)
 
 
-# game_1 = game(4,6)
+game_1 = game(3,24)
+winners = []
+for i in range(1000):
+    winners.append(game_1.play(a,b))
+print(winners)
 
-# big_iter=1000
-# small_iter=100
+
+
+
 
 # num_wins_1_list = []
 # for _ in range(big_iter):

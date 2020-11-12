@@ -1,7 +1,6 @@
 import random
 import numpy as np
-from nim import *
-from nim_players import *
+
 
 class nim_env():
     def __init__(self,i,n):

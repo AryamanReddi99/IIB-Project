@@ -1,59 +1,58 @@
 import random
 import numpy as np
-from nim import *
-from nim_players import *
+from nim_programmed_players import *
 
 class nim_env_Q():
-    def __init__(self,i,n, first_player = "agent"):
-        self.random_player=random_player()
+    def __init__(self,i,n,player_1,player_2,first_player = 1,pos_reward=1,neg_reward=-10):
         self.i = i
         self.n = n
         self.tot = 0
-        if not (first_player == "agent" or first_player == "opponent" or first_player == "random"):
-            raise ValueError("first player must be \"agent\" or \"opponent\"")
-        self.first_player = first_player
-        self.player_flag = 1
+        self.pos_reward = pos_reward
+        self.neg_reward = neg_reward
+        self.player_1 = player_1
+        self.player_2 = player_2
         self.done=False
-        self.state = np.array([self.tot,self.player_flag])
-        #self.action_space = np.array([i for i in range(1,i+1)])
         self.action_space = np.array([i for i in range(i)]) # creates action space of possible moves
         self.action_space_n = len(self.action_space)
+        if not (first_player == 1 or first_player == 2 or first_player == "random"):
+            raise ValueError("first player must be 1 or 2 or \"random\"")
+        if first_player == 1:
+            self.current_player = self.player_1
+        elif first_player == 2:
+            self.current_player = self.player_2
+        elif first_player=="random":
+            if random.random() >= 0.5:
+                self.current_player = self.player_1
+            else:
+                self.current_player = self.player_2
+        self.state = self.update_state()
     def reset(self):
         self.done=0
         self.tot=0
-        # make random player start
-        if self.first_player == "opponent":
-            self.tot += self.random_player.play(self.i,self.n,self.tot,self.player_flag) 
-        elif self.first_player == "random":
-            if random.random > 0.5:
-                self.tot += self.random_player.play(self.i,self.n,self.tot,self.player_flag) 
-        self.player_flag=1
-        return self.tot
+        return self.update_state()
     def update_state(self):
-        self.state = np.array([self.tot,self.player_flag])
+        self.state = {
+            "i":self.i,
+            "n":self.n,
+            "tot":self.tot,
+            "current_player":self.current_player       
+            }
         return self.state
     def action_space_sample(self):
         return random.choice(self.action_space)
     def step(self,action):
-        # agent's move
         self.tot += action
-        self.player_flag=2
         if self.tot<=self.n:
-            reward = 0
+            reward = self.pos_reward
             self.done=False
-            #print(self.update_state(), reward, self.done)
+            #print(self.update_state(), reward_1, reward_2, self.done)
         else:
-            reward = -10
+            # reward_1 = self.pos_reward if self.current_player == self.player_2 else self.neg_reward
+            # reward_2 = self.pos_reward if self.current_player == self.player_1 else self.neg_reward
+            reward = self.neg_reward
             self.done=True
-            return self.tot, reward, self.done
-        # opponent's move
-        self.tot += self.random_player.play(self.i,self.n,self.tot,self.player_flag)
-        self.player_flag=1
-        if self.tot<=self.n:
-            reward = 0
-            self.done=False
+        if self.current_player == self.player_1:
+            self.current_player = self.player_2
         else:
-            reward = 1
-            self.done=True
-        #print(self.update_state(), reward, self.done)
-        return self.tot, reward, self.done
+            self.current_player = self.player_1
+        return self.update_state(), reward, self.done
