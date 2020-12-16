@@ -36,7 +36,7 @@ class nim_Q_agent():
 
 i=3
 n=20
-trials  = 10000
+trials  = 1000
 batch_size = 100 # n games per batch
 scores = [[] for i in range(trials//batch_size)]
 optimal_table_reached = False

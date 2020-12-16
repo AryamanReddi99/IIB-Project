@@ -5,21 +5,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 from nim_env_Q import *
 from evaluate_q_table import *
+from scipy.interpolate import make_interp_spline, BSpline
 
 i=3
 n=20
-opponent = scalable_player(1)
-#opponent = random_player()
+#opponent = scalable_player(0.5)
+opponent = random_player()
 env = nim_env_Q(i,n,opponent,first_player="opponent")
 
 q_table = np.zeros([(env.n)+4, env.action_space_n])
 
 # Hyperparameters
-alpha = 0.1
-gamma = 0.1
+alpha = 0.6
+gamma = 0.6
 epsilon = 1.0
 epsilon_min = 0.001
-epsilon_decay = 0.995
+epsilon_decay = 0.99
 
 # For plotting metrics
 trials  = 1000
@@ -67,7 +68,7 @@ if not evaluator.evaluate_q_table():
 
 
 y = [np.mean(batch) for batch in scores]
-plt.plot(x,y,label=f"Average score over batches of {batch_size} games")
+#plt.plot(x,y,label=f"Average score over batches of {batch_size} games")
 
 window_size = 3 #compute MA
 i = 0
@@ -79,12 +80,19 @@ while i < len(y) - window_size + 1:
     moving_averages.append(window_average)
     i += 1
 x_MA = np.linspace(batch_size,trials,len(moving_averages))
-plt.plot(x_MA,moving_averages,label=f"Moving average, window = {window_size}")
+#plt.plot(x_MA,moving_averages,label=f"Moving average, window = {window_size}")
 if optimal_table_reached:
     plt.axvline(x=optimal_iter, color='r', linestyle='-', linewidth = 2,label=f"optimal policy learned at iteration {optimal_iter}")
 plt.xlabel("Trials")
-plt.ylabel(f"Average score")
+plt.ylabel(f"Performance")
+plt.title("Q-Learner vs 50% Optimal")
 plt.legend()
+#plt.show()
+
+xnew = np.linspace(x_MA.min(), x_MA.max(), 300)  
+spl = make_interp_spline(x_MA, moving_averages, k=3)  # type: BSpline
+power_smooth = spl(xnew)
+plt.plot(xnew, power_smooth)
 plt.show()
 
 print(f"Training finished.\n")
