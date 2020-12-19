@@ -1,6 +1,9 @@
 import numpy as np
 
 def moving_average(scores,batch_size,trials,window_MA=10):
+    """
+    Function which plots moving average of some data
+    """
     y = [np.mean(batch) for batch in scores]
     i = 0
     y_MA = []

@@ -1,3 +1,8 @@
+"""
+Outputs results of DQN training to a csv
+"""
+
+
 import csv
 import numpy as np
 import matplotlib.pyplot as plt

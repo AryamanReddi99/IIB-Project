@@ -70,17 +70,6 @@ if not evaluator.evaluate_q_table():
 y = [np.mean(batch) for batch in scores]
 #plt.plot(x,y,label=f"Average score over batches of {batch_size} games")
 
-window_size = 3 #compute MA
-i = 0
-moving_averages = []
-while i < len(y) - window_size + 1:
-    this_window = y[i : i + window_size]
-
-    window_average = sum(this_window) / window_size
-    moving_averages.append(window_average)
-    i += 1
-x_MA = np.linspace(batch_size,trials,len(moving_averages))
-#plt.plot(x_MA,moving_averages,label=f"Moving average, window = {window_size}")
 if optimal_table_reached:
     plt.axvline(x=optimal_iter, color='r', linestyle='-', linewidth = 2,label=f"optimal policy learned at iteration {optimal_iter}")
 plt.xlabel("Trials")
