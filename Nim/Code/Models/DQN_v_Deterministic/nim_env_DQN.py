@@ -42,7 +42,7 @@ class nim_env_DQN():
             self.done=False
             #print(self.update_state(), reward, self.done)
         else:
-            reward = -10
+            reward = -1
             self.done=True
             return self.tot, reward, self.done
         # opponent's move
