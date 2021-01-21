@@ -1,0 +1,15 @@
+Module Heirarchy:
+
+pkg = name of package for Nim containing all functions, classes
+glob = module containing all global functions and classes
+q = module containing all functions and classes related to q-learning
+dqn = module containing all functions and classes related to DQNs
+
+e.g.
+from pkg.glob import *
+from pkg.q import *
+# imports all functions from glob and q
+
+e.g.
+from pkg.dqn import *
+# just takes the dqn functions

@@ -15,7 +15,7 @@ class nim_env_QvQ():
         self.done = 0
         self.tot = 0
         self.turn = 1
-        return self.tot
+        return self.update_state()
     def update_state(self):
         self.state = np.array([self.tot,self.turn])
         return self.state
@@ -23,11 +23,11 @@ class nim_env_QvQ():
         return random.choice(self.action_space)
     def step(self,action):
         self.tot += action
-        self.turn*=-1
+        self.turn *= -1
         if self.tot<=self.n:
-            reward = 0
+            reward = 0 # handle rewards outside
             self.done=False
         else:
             reward = 0
             self.done=True
-        return self.tot, reward, self.done
+        return self.update_state(), reward, self.done

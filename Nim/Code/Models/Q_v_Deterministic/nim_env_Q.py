@@ -24,8 +24,8 @@ class nim_env_Q():
         if self.first_player == "opponent":
             self.tot += self.opponent.play(self.i,self.n,self.tot,self.player_flag) 
         elif self.first_player == "random":
-            if random.random > 0.5:
-                self.tot += self.opponent.play(self.i,self.n,self.tot,self.player_flag) 
+            if random.random() > 0.5:
+                self.tot += self.opponent.play(self.i,self.n,self.tot,self.player_flag) # lay opponent first
         self.player_flag=1
         return self.tot
     def update_state(self):
@@ -42,7 +42,7 @@ class nim_env_Q():
             self.done=False
             #print(self.update_state(), reward, self.done)
         else:
-            reward = -10
+            reward = -1
             self.done=True
             return self.tot, reward, self.done
         # opponent's move
