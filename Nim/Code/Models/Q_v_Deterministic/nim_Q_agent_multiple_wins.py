@@ -258,6 +258,8 @@ if optimal_table:
     plt.axvline(x=optimal_iter, color='g', linestyle='--', linewidth = 3,label=f"optimal policy learned at iteration {optimal_iter}")
 plt.plot(xspl_3,yspl_3, linewidth = 3.5, color='g',label=f"Skill = {skill}")
 #plt.plot(table_abs, linewidth = 3.5, color='g',label=f"Skill = {skill}")
+plt.xlabel("Trials", fontsize=20)
+plt.ylabel(f"Average reward", fontsize=20)
 plt.title("Q-Learner vs Multiple Skill Levels", fontsize=20)
 plt.legend(loc='lower right', fontsize=15)
 plt.ylim(-0.5,1)
@@ -276,7 +278,7 @@ plt.show()
 
 
 if store_img:
-    fig1.savefig(f"Images/win_rate_multiple.jpg", dpi = 100)
+    fig1.savefig(f"Images/win_rate_multiple_redo.jpg", dpi = 100)
     #fig2.savefig(f"Images/table_abs_multiple.jpg", dpi = 100)
     print("Images saved!")
 
