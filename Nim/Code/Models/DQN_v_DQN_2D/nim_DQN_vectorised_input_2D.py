@@ -8,9 +8,7 @@ from keras.models import Sequential,load_model,save_model
 from keras import layers
 from keras.layers import Dense
 from keras.optimizers import Adam
-from pkg.plot import *
-from pkg.q import *
-from pkg.dqn import *
+
 
 store_img = True
 store_model = False
