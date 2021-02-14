@@ -91,14 +91,14 @@ def main():
     """
 
     bounds = (np.array((800, 800)))  # to match default in screenConfig
-    screenConfig = ScreenConfigStruct(framerate=1)
+    screenConfig = ScreenConfigStruct(framerate=10)
     window = Window(screenConfig)
 
 
 
     ### PARAMETERS ###
     num_people = 200
-    net_size = 10 # Must be >= 42
+    net_size = 10 # Must be <= 42
     ### ---------- ###
 
 

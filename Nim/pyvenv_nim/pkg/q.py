@@ -1,5 +1,5 @@
 import numpy as np
-from pkg.glob import *
+from general import *
 
 class evaluate_q_table():
     # class which evaluates whether a q-table has reached the optimal policy
@@ -48,6 +48,7 @@ def main():
         print(evaluator.faulty_rows())
     print(evaluator.row_evaluations)
     print(evaluator.abs_vals())
+    print("done")
 
 if __name__ == "main":
     main()

@@ -22,9 +22,9 @@ class Window:
         windowSize = screenConfig.windowSize
         xBounds = screenConfig.xBounds 
         yBounds = screenConfig.yBounds
-        pygame.display.set_mode(windowSize, flags=DOUBLEBUF | OPENGL)
+        pygame.display.set_mode(windowSize, flags=DOUBLEBUF | OPENGL) # dont mess with this
 
-        if screenConfig.perspective == "ortho":
+        if screenConfig.perspective == "ortho": # infinitely far away
             glOrtho(*xBounds, *yBounds,-1, 1)
         else:
             zBounds = screenConfig.zBounds
@@ -90,7 +90,7 @@ class Window:
 
         if num_attribs == 1:
             glPointSize(size)
-            glColor3d(*colour)
+            glColor3d(*colour) # color3d = RBG color
             glBegin(GL_POINTS)
             # attribFuncs is default
 
@@ -134,11 +134,11 @@ class Window:
 
     def clear_window(self):
         """Removes all drawings from screen"""
-        glClear(GL_COLOR_BUFFER_BIT)
+        glClear(GL_COLOR_BUFFER_BIT) # clear buffer on easel
     
     def refresh_display(self):
         """Refreshes screen"""
-        pygame.display.flip()
+        pygame.display.flip() # flip the 2 buffers (visible one and the one being drawn)
         if self.framerate != None:
             self.clock.tick(30)
 
