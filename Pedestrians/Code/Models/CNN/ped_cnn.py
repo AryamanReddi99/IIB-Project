@@ -22,16 +22,17 @@ def main():
     load_fn = "cnn-fn"
 
     # Create Environment
-    env_size = 256 # board size
+    env_size = 512 # board size
     posconfig = PosConfig(size=env_size)
     gameconfig = GameConfig(
         posconfig=posconfig,
         config=1,
-        speed=8,
+        speed=10,
         num_agents=2,
-        agent_size=8,
+        agent_size=16,
         channels=4,
-        num_actions=5)
+        num_actions=5,
+        doom=True)
     env = PedEnv(gameconfig)
 
     # Create Display
