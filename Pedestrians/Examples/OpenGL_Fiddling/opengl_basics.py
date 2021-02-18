@@ -1,48 +1,42 @@
-import pygame as pg
-from pygame.locals import *
+# Simple pygame program
 
+# Import and initialize the pygame library
+import pygame
+import random
+from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
+pygame.init()
+screen = pygame.display.set_mode([256, 256])
 
-cubeVertices = ((1,1,1),(1,1,-1),(1,-1,-1),(1,-1,1),(-1,1,1),(-1,-1,-1),(-1,-1,1),(-1,1,-1))
-cubeEdges = ((0,1),(0,3),(0,4),(1,2),(1,7),(2,5),(2,3),(3,6),(4,6),(4,7),(5,6),(5,7))
-cubeQuads = ((0,3,6,4),(2,5,6,3),(1,2,5,7),(1,0,4,7),(7,4,6,5),(2,3,0,1))
+# Set up the drawing window
 
-def wireCube():
-    glBegin(GL_LINES)
-    for cubeEdge in cubeEdges:
-        for cubeVertex in cubeEdge:
-            glVertex3fv(cubeVertices[cubeVertex])
-    glEnd()
+# Example points
+blue = (0, 0, 255)
+red  = (255, 0, 0)
 
-def solidCube():
-    glBegin(GL_QUADS)
-    for cubeQuad in cubeQuads:
-        for cubeVertex in cubeQuad:
-            glVertex3fv(cubeVertices[cubeVertex])
-    glEnd()
+agent_1 = [100,200]
+agent_2 = [200,100]
 
-def main():
-    pg.init()
-    display = (500, 500)
-    pg.display.set_mode(display, DOUBLEBUF|OPENGL)
+# Run until the user asks to quit
+running = True
+while True:
 
-    gluPerspective(45, (display[0]/display[1]), 0.1, 50.0)
+    # Did the user click the window close button?
 
-    glTranslatef(0.0, 0.0, -5)
 
-    while True:
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                pg.quit()
-                quit()
+    # Fill the background with black
+    screen.fill((0, 0, 0))
 
-        glRotatef(1, 1, 1, 1)
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-        solidCube()
-        wireCube()
-        pg.display.flip()
-        pg.time.wait(10)
+    # Draw a solid blue circle in the center
+    agent_1 = [random.randint(0,256),random.randint(0,256)]
+    agent_2 = [random.randint(0,256),random.randint(0,256)]
 
-if __name__ == "__main__":
-    main()
+    pygame.draw.circle(screen, blue, agent_1, 5)
+    pygame.draw.circle(screen, red, agent_2, 5)
+
+    # Flip the display
+    pygame.display.flip()
+
+# Done! Time to quit.
+pygame.quit()
