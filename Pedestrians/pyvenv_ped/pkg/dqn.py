@@ -40,7 +40,7 @@ class CNN():
         # stores last 2 sets of agent positions
         self.agent_pos_buffer = collections.deque(maxlen=2)
         # stores last 2 sets of target positions
-        self.target_pos_buffer = collections.deque(maxlen=2)
+        self.target_pos_buffer = collections.deque(maxlen=1)
         # states
         self.state_buffer = collections.deque(maxlen=2)
 
@@ -56,17 +56,14 @@ class CNN():
         """
         model = Sequential()
 
-        # input, conv 1
-        model.add(
-                Conv2D(32,(3,3),input_shape=(self.env_size,self.env_size,self.channels),
-                padding='same',
-                activation='relu'))
+        # Input, Conv 1
+        model.add(Conv2D(32, (3,3), input_shape=(self.env_size,self.env_size,self.channels), padding='same', activation='relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Dropout(0.2))
         model.add(BatchNormalization())
 
         # conv 2
-        model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
+        model.add(Conv2D(64, (3,3), padding='same', activation='relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Dropout(0.2))
         model.add(BatchNormalization())
@@ -77,19 +74,21 @@ class CNN():
         # model.add(Dropout(0.2))
         # model.add(BatchNormalization())
 
-        # dense 1
+        # Flatten
         model.add(Flatten())
+
+        # Dense 1
         model.add(Dense(256, activation='relu'))
         model.add(Dropout(0.2))
         model.add(BatchNormalization())
 
-        # dense 2
-        # model.add(Dense(128, activation='relu'))
-        # model.add(Dropout(0.2))
-        # model.add(BatchNormalization())
+        # Dense 2
+        model.add(Dense(128, activation='relu'))
+        model.add(Dropout(0.2))
+        model.add(BatchNormalization())
 
         # output
-        model.add(Dense(self.num_actions, activation='softmax'))
+        model.add(Dense(self.num_actions))
 
         # compile
         model.compile(
@@ -100,15 +99,20 @@ class CNN():
         self.model = model
 
     def update_pos_buffers(self, agent_pos, target_pos):
+        # Agents
         agent_pos_data = [None for _ in range(self.num_agents)]
-        target_pos_data = [None for _ in range(self.num_agents)]
         for agent, pos in enumerate(agent_pos):
             agent_pos_data[agent] = self._matrixify(pos)
-        for target, pos in enumerate(target_pos):
-            target_pos_data[target] = self._matrixify(pos)
-
         self.agent_pos_buffer.append(agent_pos_data)
-        self.target_pos_buffer.append(target_pos_data)
+
+        # Targets
+        if len(self.target_pos_buffer) == 0:
+            target_pos_data = [None for _ in range(self.num_agents)]
+            for target, pos in enumerate(target_pos):
+                target_pos_data[target] = self._matrixify(pos)
+            self.target_pos_buffer.append(target_pos_data)
+
+        # Update inputs 
         if len(self.agent_pos_buffer) > 1:
             self._update_state_buffer()
 
@@ -123,12 +127,12 @@ class CNN():
             if done_list[agent]:
                 action = 0 # stop moving
             # explore
-            elif random.uniform(0,1) < self._update_epsilon(game):
+            elif random.uniform(0,1) < self._get_epsilon(game):
                 action = self._action_space_sample()
             # exploit
             else:
-                agent_input = self.state_buffer[-1][agent]
-                qvals = self.model.predict(agent_input)
+                state = self.state_buffer[-1][agent]
+                qvals = self.model.predict(state)
                 action = np.argmax(qvals)
             action_list[agent] = action
         return action_list
@@ -154,19 +158,20 @@ class CNN():
         """
         states = [None for _ in range(self.num_agents)] # [None, None]
         for agent in range(self.num_agents):
+            # agent needs current pos, target pos, current + previous pos for each opponent
             agent_input = [None for _ in range(2 + ((self.num_agents - 1)*2))]
             # agent's current position
             agent_input[0] = self.agent_pos_buffer[-1][agent]
             # agent's target position
             agent_input[1] = self.target_pos_buffer[-1][agent]
             # opponent positions
-            insert_positions = 0
+            insert_position = 2
             for other_agent in range(self.num_agents):
                 if agent != other_agent:
-                    agent_input[2 + insert_positions] = self.agent_pos_buffer[-1][other_agent] # where they are
-                    agent_input[2 + insert_positions + 1] = self.agent_pos_buffer[0][other_agent] # where they were
-                    insert_positions += 2
-            agent_input = np.array(agent_input).reshape(1,self.env_size,self.env_size,self.channels)
+                    agent_input[insert_position] = self.agent_pos_buffer[-1][other_agent] # where they are
+                    agent_input[insert_position + 1] = self.agent_pos_buffer[-2][other_agent] # where they were
+                    insert_position += 2
+            agent_input = arr2stack(np.array(agent_input))
             states[agent] = agent_input
         self.state_buffer.append(states)
 
@@ -178,12 +183,12 @@ class CNN():
         # Recieve SARSD training data as 5 numpy arrays
         states, actions, rewards, new_states, dones = self.replay_sample
 
-        # Reshape states and new states into batches for prediction & fitting
-        states_batch = states.reshape(self.minibatch_size, self.env_size, self.env_size, self.channels)
-        new_states_batch = new_states.reshape(self.minibatch_size, self.env_size, self.env_size, self.channels)
+        # Reshape states and new states into batches
+        states_batch = np.squeeze(states)
+        new_states_batch = np.squeeze(new_states)
 
         # Predicted state q values
-        target_q_vals = self.model.predict(states_batch)
+        target_qvals = self.model.predict(states_batch)
 
         # Predicted new state q values
         new_states_qvals = self.model.predict(new_states_batch)
@@ -191,13 +196,13 @@ class CNN():
         # Train on each experience
         for i, (state,action,reward,new_state_qvals,done) in enumerate(zip(states,actions,rewards,new_states_qvals,dones)): 
             if done:
-                target_q_val = reward
+                target_qval = reward
             else:
-                target_q_val = reward + self.gamma * np.max(new_state_qvals)
-            target_q_vals[i][action] = target_q_val
-        self.model.fit(states_batch, target_q_vals, batch_size=self.minibatch_size, epochs=1, verbose=1)
+                target_qval = reward + self.gamma * np.max(new_state_qvals)
+            target_qvals[i][action] = target_qval
+        self.model.fit(states_batch, target_qvals, batch_size=self.minibatch_size, epochs=1, verbose=1)
 
-    def _update_epsilon(self, game):
+    def _get_epsilon(self, game):
         """
         Returns epsilon (random move chance) as decaying e^-x with first
         frac_random*games totally random
@@ -234,14 +239,14 @@ class NNConfig():
     "testing" -> doesn't explore (epsilon = 0)
     """
     def __init__(self,
-            mode = "training",
-            gamma = 0.6,
-            mem_max_size = 1000,
-            minibatch_size = 32,
-            frac_random = 0.1,
-            final_epsilon = 0.01,
-            min_epsilon = 0.01
-            ):
+                mode = "training",
+                gamma = 0.6,
+                mem_max_size = 1000,
+                minibatch_size = 32,
+                frac_random = 0.1,
+                final_epsilon = 0.01,
+                min_epsilon = 0.01
+                ):
 
         self.mode = mode
         self.gamma = gamma
@@ -275,77 +280,6 @@ class ReplayMemory:
         
         return np.array(states), np.array(actions), np.array(rewards), np.array(new_states), np.array(dones)
 
-def experience_replay(model, replay_sample, gamma):
-    """
-    Trains a model on q(s,a) of sampled experiences
-    """
-
-    # Recieve SARSD training data
-    states, actions, rewards, new_states, dones = self.replay_sample
-
-    # Train on each experience
-    for i, (state,action,reward,new_state,done) in enumerate(zip(states,actions,rewards,new_states,dones)): 
-        # Predict q-valutes for state
-        qvals = model.predict(state)
-        if done:
-            target_q_val = reward
-        else:
-            qvals_new_state = model.predict(new_state)
-            target_q_val = reward + gamma * np.max(qvals_new_state)
-
-        qvals[0][action] = target_q_val
-        model.fit(state, qvals, epochs=1, verbose=1)
-    return model
-
-def create_model(gameconfig):
-    """
-    Creates Sequential CNN
-    """
-    model = Sequential()
-
-    # input, conv 1
-    model.add(
-            Conv2D(32,(3,3),input_shape=(gameconfig.env_size,gameconfig.env_size,gameconfig.channels),
-            padding='same',
-            activation='relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.2))
-    model.add(BatchNormalization())
-
-    # conv 2
-    model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.2))
-    model.add(BatchNormalization())
-
-    # conv 3
-    # model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
-    # model.add(MaxPooling2D(pool_size=(2, 2)))
-    # model.add(Dropout(0.2))
-    # model.add(BatchNormalization())
-
-    # dense 1
-    model.add(Flatten())
-    model.add(Dense(256, activation='relu'))
-    model.add(Dropout(0.2))
-    model.add(BatchNormalization())
-
-    # dense 2
-    # model.add(Dense(128, activation='relu'))
-    # model.add(Dropout(0.2))
-    # model.add(BatchNormalization())
-
-    # output
-    model.add(Dense(gameconfig.num_actions, activation='softmax'))
-
-    # compile
-    model.compile(
-        loss='categorical_crossentropy',
-        optimizer='Adam',
-        metrics=['accuracy'])
-
-    return model
-
 ####################################### main() ####################################
 def main():
     gameconfig = GameConfig(
@@ -364,10 +298,8 @@ def main():
         frac_random=0.1,
         final_epsilon=0.01,
         min_epsilon=0.01)
-
     cnn = CNN(gameconfig,nn_config)
     print("Finished")
-
 
 if __name__ == "__main__":
     main()

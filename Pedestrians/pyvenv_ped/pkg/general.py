@@ -3,7 +3,7 @@ from random import randint
 
 def float2mat(pos, size):
     """
-    Converts position in np.array x-y format into 1-hot matrix
+    Converts position in np.array x-y format into square matrix
     e.g. [0,0] in 2x2 grid -> [0 0]
                               [1 0]
     """
@@ -23,10 +23,9 @@ def float2mat(pos, size):
         try:
             mat[size - 1 - y, x] = 1
         except:
-            # if outside bounds, no longer need representions
+            # if outside bounds, not present in matrix
             pass
     return mat
-
 
 def pos2pygame(pos, size):
     """
@@ -45,12 +44,27 @@ def pos2pygame(pos, size):
             raise TypeError("position must be integer")
         return np.array([x, size - 1 - y])
 
+def arr2stack(arr):
+    """
+    converts from ndarray list of channels (channels,size,size) to 
+    model-friendly RGB-stack format (batch_size,size,size,channels)
+    """
+    channels, env_size, _ = arr.shape
+    return np.transpose(arr, (1,2,0)).reshape(1,env_size,env_size,channels)
+
+def stack2arr(arr):
+    """
+    converts from model-friendly RGB stack format to ndarray list of
+    separate channels 
+    """
+    _, env_size, _, channels = arr.shape
+    return np.transpose(arr.reshape(env_size,env_size,channels), (2,0,1))
+
 def bound(low, high, value):
     """
     Bounds value between low, high
     """
     return max(low, min(high, value))
-
 
 def get_epsilon(game, frac_random=0.1, final_epsilon=0.01, min_epsilon=0.02, num_games=1000):
     """
@@ -153,7 +167,7 @@ class _PosConfig():
         """
         x = self.size / 16
         y = self.size / 16
-        agent_1 = np.array([2, y * 8])
+        agent_1 = np.array([1, y * 8])
         agent_2 = np.array([self.size - 2, y * 8])
         target_1 = [np.array([self.size - 1, i]) for i in range(0, self.size)]
         target_2 = [np.array([0, i]) for i in range(0, self.size)]
@@ -174,6 +188,10 @@ class GameConfig():
                  doom = False
                  ):
 
+        # Starting Configurations
+        self.posconfig = _PosConfig(env_size)
+        self.pos_dict_initial = self.posconfig.configs[config].copy()
+
         # Game parameters
         self.env_size = env_size
         self.config = config
@@ -184,16 +202,11 @@ class GameConfig():
         self.num_actions = num_actions
         self.games = games
 
-        # Starting Configurations
-        self.posconfig = _PosConfig(env_size)
-        self.pos_dict_initial = self.posconfig.configs[config].copy()
-
         # Assertions
         assert(self.speed <= 3*self.agent_size)
 
         # Doom
         self.doom = doom
-
 
 def main():
     print(pos2pygame(np.array([3,4]), 10))

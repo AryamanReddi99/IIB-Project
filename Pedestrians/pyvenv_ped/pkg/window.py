@@ -271,24 +271,25 @@ class ScreenConfig():
     Stores config information about pygame display
     """
 
-    def __init__(self, headless=False, border_size=10):
+    def __init__(self, 
+                headless=False, 
+                border_size=10):
         self.headless = headless
         self.border_size = border_size
 
 class DisplayInfo():
     def __init__(self,
-            agent_pos, 
-            target_pos, 
-            action_list,
-            reward_list,
-            done_list, 
-            collided_list, 
-            reached_list, 
-            breached_list,
-            done,
-            game,
-            move):
-        
+                agent_pos, 
+                target_pos, 
+                action_list,
+                reward_list,
+                done_list, 
+                collided_list, 
+                reached_list, 
+                breached_list,
+                done,
+                game,
+                move):
         self.agent_pos = agent_pos
         self.target_pos = target_pos
         self.action_list = action_list

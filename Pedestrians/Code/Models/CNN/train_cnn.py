@@ -83,7 +83,7 @@ def main():
             action_list = cnn.act(game, done_list)
 
             # For testing collisions/targets
-            #action_list = [1,3]
+            #action_list = [3,4]
 
             # Take Actions
             [agent_1, agent_2], [target_1, target_2], reward_list, done_list, collided_list, reached_list, breached_list, done = env.step(action_list)
@@ -116,7 +116,7 @@ def main():
                 move = move)
             window.display(display_info=display_info) # display info on pygame screen
 
-            # Update stop_list, check if done:
+            # Stop list is delayed done list
             stop_list = done_list
             if done:
                 time.sleep(1)
