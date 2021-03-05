@@ -1,6 +1,7 @@
 import collections
 import random
 import numpy as np
+from keras.optimizers import Adam
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, Flatten, BatchNormalization, Activation, Conv2D, MaxPooling2D
 from .general import *
@@ -33,16 +34,17 @@ class CNN():
         self.frac_random = nn_config.frac_random
         self.final_epsilon = nn_config.final_epsilon
         self.min_epsilon = nn_config.min_epsilon
+        self.learning_rate = nn_config.learning_rate
 
         ## Buffers
-        # experiences
-        self.replay_buffer = ReplayMemory(capacity=nn_config.mem_max_size)
         # stores last 2 sets of agent positions
         self.agent_pos_buffer = collections.deque(maxlen=2)
-        # stores last 2 sets of target positions
+        # stores target positions
         self.target_pos_buffer = collections.deque(maxlen=1)
-        # states
+        # stores last 2 sets of model-readable states
         self.state_buffer = collections.deque(maxlen=2)
+        # stores experiences
+        self.replay_buffer = collections.deque(maxlen=nn_config.mem_max_size)
 
     def save_cnn(self, path):
         self.model.save(path)
@@ -93,7 +95,7 @@ class CNN():
         # compile
         model.compile(
             loss='mean_squared_error',
-            optimizer='Adam',
+            optimizer=Adam(learning_rate=self.learning_rate),
             metrics=['accuracy'])
 
         self.model = model
@@ -140,9 +142,10 @@ class CNN():
     def train(self):
         if self.mode == "testing":
             return
-        if self.replay_buffer.len() < self.minibatch_size:
+        if len(self.replay_buffer) < self.minibatch_size:
             return
-        self.replay_sample = self.replay_buffer.replay_sample(self.minibatch_size)
+        self.replay_sample = self._get_replay_sample()
+        #self.replay_sample = self.replay_buffer.replay_sample(self.minibatch_size)
         self._experience_replay()
 
     def update_experiences(self, agent, action_list, reward_list, done_list):
@@ -175,6 +178,11 @@ class CNN():
             states[agent] = agent_input
         self.state_buffer.append(states)
 
+    def _get_replay_sample(self):
+        indices = np.random.choice(len(self.replay_buffer), self.minibatch_size, replace=False)
+        states, actions, rewards, new_states, dones = zip(*[self.replay_buffer[index] for index in indices])
+        return np.array(states), np.array(actions), np.array(rewards), np.array(new_states), np.array(dones)
+
     def _experience_replay(self):
         """
         Trains a model on q(s,a) of sampled experiences
@@ -200,7 +208,7 @@ class CNN():
             else:
                 target_qval = reward + self.gamma * np.max(new_state_qvals)
             target_qvals[i][action] = target_qval
-        self.model.fit(states_batch, target_qvals, batch_size=self.minibatch_size, epochs=1, verbose=1)
+        self.history = self.model.fit(states_batch, target_qvals, batch_size=self.minibatch_size, epochs=1, verbose=1)
 
     def _get_epsilon(self, game):
         """
@@ -245,7 +253,8 @@ class NNConfig():
                 minibatch_size = 32,
                 frac_random = 0.1,
                 final_epsilon = 0.01,
-                min_epsilon = 0.01
+                min_epsilon = 0.01,
+                learning_rate = 0.001
                 ):
 
         self.mode = mode
@@ -255,30 +264,12 @@ class NNConfig():
         self.frac_random = frac_random
         self.final_epsilon = final_epsilon
         self.min_epsilon = min_epsilon
+        self.learning_rate = learning_rate
 
 ################################# External Functions/Classes ##############################
 
 # Tuple class which contains details of an experience
 Experience = collections.namedtuple('Experience', field_names=['state', 'action', 'reward', 'new_state', 'done'])
-
-class ReplayMemory:
-    """
-    Holds experiences in a deque and returns randomly sampled experiences for replay
-    """
-    def __init__(self, capacity):
-        self.buffer = collections.deque(maxlen=capacity)
-
-    def len(self):
-        return len(self.buffer) 
-
-    def append(self, experience):
-        self.buffer.append(experience)
-  
-    def replay_sample(self, batch_size):
-        indices = np.random.choice(len(self.buffer), batch_size, replace=False)
-        states, actions, rewards, new_states, dones = zip(*[self.buffer[index] for index in indices])
-        
-        return np.array(states), np.array(actions), np.array(rewards), np.array(new_states), np.array(dones)
 
 ####################################### main() ####################################
 def main():

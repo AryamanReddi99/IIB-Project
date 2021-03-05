@@ -22,7 +22,10 @@ class Window():
             return
         print("Initialising Display...")
         pygame.init()
-        os.chdir(os.path.dirname(__file__))
+
+        # Path
+        sep = os.path.sep
+        pkg_path = f"C:{sep}Users{sep}Red{sep}Google_Drive{sep}IIB_Project{sep}Pedestrians{sep}pkg{sep}"
 
         # Controls
         self.pause = False
@@ -56,7 +59,6 @@ class Window():
             self.white]
 
         # Text
-        sep = os.path.sep
         if gameconfig.env_size == 256:
             font_size = 20
         elif gameconfig.env_size == 128:
@@ -67,7 +69,7 @@ class Window():
             font_size = 25
         font_1 = pygame.freetype.SysFont("constantia", font_size)
         font_2 = pygame.freetype.SysFont("couriernew", 10)
-        font_3 = pygame.freetype.Font(f"Doom{sep}DooM.ttf", 22)
+        font_3 = pygame.freetype.Font(pkg_path + f"Doom{sep}DooM.ttf", 22)
         self.font = font_1
 
         # Create screens and surfaces
@@ -87,8 +89,8 @@ class Window():
         # Doom
         self.doom = gameconfig.doom
         if self.doom:
-            self.cacodemon_left = pygame.image.load(f'Doom{sep}caco_left.png')
-            self.cacodemon_right = pygame.image.load(f'Doom{sep}caco_right.png')
+            self.cacodemon_left = pygame.image.load(pkg_path + f'Doom{sep}caco_left.png')
+            self.cacodemon_right = pygame.image.load(pkg_path + f'Doom{sep}caco_right.png')
             self.font = font_3
             self.agent_size = 16
 
@@ -331,7 +333,6 @@ def main():
         window.display(display_info=display_info)
 
         time.sleep(0.3)
-
 
 if __name__ == "__main__":
     main()

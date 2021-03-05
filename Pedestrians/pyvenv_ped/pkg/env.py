@@ -73,30 +73,18 @@ class PedEnv():
             for agent, pos in enumerate(self.agent_pos):
                 self.reached_list[agent] = self._check_collision_ball(pos, self.target_pos[agent])
         elif self.config < 20:
-            # Check if correct wall passed
+            # Check if correct wall has been passed
             for agent, pos in enumerate(self.agent_pos):
                 target = self.target_pos[agent]
-                # [x,y] -> [bool, bool] for fixed wall axis
-                # e.g. left wall -> [True, False]
-                # e.g. top wall  -> [False, True]
-                wall_alignment = np.equal(target,np.flip(target,axis=0)).all(axis=0)
-                # Vertical walls
-                if wall_alignment[0]:
-                    # Left 
-                    if target[0][0] == 0:
-                        self.reached_list[agent] = pos[0] < 0
-                    # Right
-                    elif target[0][0] == self.env_size - 1:
-                        self.reached_list[agent] = pos[0] > self.env_size - 1
-                # Horizontal walls
-                elif wall_alignment[1]:
-                    # Down
-                    if target[0][1] == 0:
-                        self.reached_list[agent] = pos[1] < 0
-                    elif target[0][1] == self.env_size - 1:
-                        self.reached_list[agent] = pos[1] > self.env_size - 1
-                else:
-                    raise ValueError("Wall targets incorrectly configured!")
+                wall = which_wall(target)
+                if wall == "left":
+                    self.reached_list[agent] = pos[0] < 0
+                elif wall == "right":
+                    self.reached_list[agent] = pos[0] > self.env_size - 1
+                elif wall == "bottom":
+                    self.reached_list[agent] = pos[1] < 0
+                elif wall == "top":
+                    self.reached_list[agent] = pos[1] > self.env_size - 1
         return self.reached_list
 
     def _return_collided(self):

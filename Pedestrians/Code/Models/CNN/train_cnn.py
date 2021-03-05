@@ -1,6 +1,8 @@
 import os
 import time
+import pprint
 import numpy as np
+import matplotlib.pyplot as plt
 from datetime import datetime
 from pathlib import Path
 from tqdm import tqdm
@@ -10,6 +12,16 @@ from pkg.dqn import *
 from pkg.window import *
 
 def main():
+
+    # Miscellaneous
+    pp = pprint.PrettyPrinter(indent=4)
+
+    # Data Storage Paths
+    sep = os.path.sep # system path seperator
+    os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
+    fn = Path(__file__).stem # this filename
+    store_model_fn = f"..{sep}Saved{sep}" + fn + datetime.now().strftime("-%d-%m-%y_%H-%M") + f"{sep}Model"
+    load_model_fn = "insert_path_here".replace(sep,sep)
 
     # Storage Triggers
     store_img = True
@@ -25,7 +37,7 @@ def main():
         agent_size=8,
         channels=4,
         num_actions=5,
-        games=100,
+        games=200,
         doom=False)
     env = PedEnv(gameconfig)
 
@@ -43,7 +55,8 @@ def main():
         minibatch_size=32,
         frac_random=0.1,
         final_epsilon=0.01,
-        min_epsilon=0.01)
+        min_epsilon=0.01,
+        learning_rate = 0.001)
     cnn = CNN(gameconfig,nn_config)
     if load_model:
         cnn.load_cnn(load_model_fn)
@@ -52,6 +65,11 @@ def main():
 
     # Game Parameters
     max_game_length = 50
+
+    ### Diagnostics
+    q_vals_death = np.zeros((3,200,5))
+    labels = ['dont move', 'up', 'down', 'left',' right']
+
 
     # Begin Training
     for game in tqdm(range(gameconfig.games)):
@@ -63,8 +81,8 @@ def main():
 
         # Display Data
         display_info = DisplayInfo(
-            agent_pos = [pos2pygame(agent_1, gameconfig.env_size), pos2pygame(agent_2, gameconfig.env_size)],
-            target_pos = [pos2pygame(target_1, gameconfig.env_size), pos2pygame(target_2, gameconfig.env_size)],
+            agent_pos = [float2pygame(agent_1, gameconfig.env_size), float2pygame(agent_2, gameconfig.env_size)],
+            target_pos = [float2pygame(target_1, gameconfig.env_size), float2pygame(target_2, gameconfig.env_size)],
             action_list = [0, 0],
             reward_list = reward_list,
             done_list = done_list,
@@ -77,13 +95,18 @@ def main():
         window.display(display_info=display_info) # display info on pygame screen
 
         # Play Game
-        for move in range(1, max_game_length):
+        for move in range(0, max_game_length):
+
+            ### Diagnostics
+            s_test = cnn.state_buffer[-1][0]
+            qvals = cnn.model.predict(s_test)
+            q_vals_death[move][game] = np.copy(qvals)
 
             # Get CNN Actions
             action_list = cnn.act(game, done_list)
 
             # For testing collisions/targets
-            #action_list = [3,4]
+            action_list = [4,3]
 
             # Take Actions
             [agent_1, agent_2], [target_1, target_2], reward_list, done_list, collided_list, reached_list, breached_list, done = env.step(action_list)
@@ -103,8 +126,8 @@ def main():
 
             # Display Data
             display_info = DisplayInfo(
-                agent_pos = [pos2pygame(agent_1, gameconfig.env_size), pos2pygame(agent_2, gameconfig.env_size)],
-                target_pos = [pos2pygame(target_1, gameconfig.env_size), pos2pygame(target_2, gameconfig.env_size)],
+                agent_pos = [float2pygame(agent_1, gameconfig.env_size), float2pygame(agent_2, gameconfig.env_size)],
+                target_pos = [float2pygame(target_1, gameconfig.env_size), float2pygame(target_2, gameconfig.env_size)],
                 action_list = action_list,
                 reward_list = reward_list,
                 done_list = done_list,
@@ -117,22 +140,33 @@ def main():
             window.display(display_info=display_info) # display info on pygame screen
 
             # Stop list is delayed done list
-            stop_list = done_list
+            stop_list = np.copy(done_list)
             if done:
-                time.sleep(1)
+                time.sleep(0.2)
                 break
-
-    # Data Storage Paths
-    sep = os.path.sep # system path seperator
-    os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
-    fn = Path(__file__).stem # this filename
-    store_model_fn = f"..{sep}Saved{sep}" + fn + datetime.now().strftime("-%d-%m-%y_%H-%M") + f"{sep}Model"
-    load_model_fn = "".replace(sep,sep)
 
     # Store Model
     if store_model:
         cnn.model.save(store_model_fn)
         print(f"Model saved at {store_model_fn}")
+
+    ### Diagnostics
+    x = np.arange(0,200)
+
+    fig, axs = plt.subplots(3, 1, sharex=True)
+    axs[0].plot(x,q_vals_death[0])
+    axs[0].set_title("3 steps from collision")
+    axs[0].legend(labels, loc="lower left")
+    axs[1].plot(x,q_vals_death[1])
+    axs[1].set_title("2 steps from collision")
+    axs[1].legend(labels, loc="lower left")
+    axs[1].set_ylabel("Predicted Q-value")
+    axs[2].plot(x,q_vals_death[2])
+    axs[2].set_title("1 step from collision")
+    axs[2].legend(labels, loc="lower left")
+    axs[2].set_xlabel("Episode")
+    fig.suptitle("Predicted Q-values for rightward agent on collision course", fontsize=14)
+    plt.show()
 
     print("Finished")
 
