@@ -142,7 +142,8 @@ def main():
             # Stop list is delayed done list
             stop_list = np.copy(done_list)
             if done:
-                time.sleep(0.2)
+                if not screenconfig.headless:
+                    time.sleep(0.2)
                 break
 
     # Store Model
