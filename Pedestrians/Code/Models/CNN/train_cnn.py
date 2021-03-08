@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from pathlib import Path
 from tqdm import tqdm
+from keras.utils.vis_utils import plot_model
 from pkg.general import *
 from pkg.env import *
 from pkg.dqn import *
@@ -37,7 +38,7 @@ def main():
         agent_size=8,
         channels=4,
         num_actions=5,
-        games=200,
+        games=100,
         doom=False)
     env = PedEnv(gameconfig)
 
@@ -67,8 +68,8 @@ def main():
     max_game_length = 50
 
     ### Diagnostics
-    q_vals_death = np.zeros((3,200,5))
-    labels = ['dont move', 'up', 'down', 'left',' right']
+    # q_vals_death = np.zeros((3,200,5))
+    # labels = ['dont move', 'up', 'down', 'left',' right']
 
 
     # Begin Training
@@ -98,15 +99,15 @@ def main():
         for move in range(0, max_game_length):
 
             ### Diagnostics
-            s_test = cnn.state_buffer[-1][0]
-            qvals = cnn.model.predict(s_test)
-            q_vals_death[move][game] = np.copy(qvals)
+            # s_test = cnn.state_buffer[-1][0]
+            # qvals = cnn.model.predict(s_test)
+            # q_vals_death[move][game] = np.copy(qvals)
 
             # Get CNN Actions
             action_list = cnn.act(game, done_list)
 
             # For testing collisions/targets
-            action_list = [4,3]
+            #action_list = [4,3]
 
             # Take Actions
             [agent_1, agent_2], [target_1, target_2], reward_list, done_list, collided_list, reached_list, breached_list, done = env.step(action_list)
@@ -152,22 +153,22 @@ def main():
         print(f"Model saved at {store_model_fn}")
 
     ### Diagnostics
-    x = np.arange(0,200)
+    # x = np.arange(0,200)
 
-    fig, axs = plt.subplots(3, 1, sharex=True)
-    axs[0].plot(x,q_vals_death[0])
-    axs[0].set_title("3 steps from collision")
-    axs[0].legend(labels, loc="lower left")
-    axs[1].plot(x,q_vals_death[1])
-    axs[1].set_title("2 steps from collision")
-    axs[1].legend(labels, loc="lower left")
-    axs[1].set_ylabel("Predicted Q-value")
-    axs[2].plot(x,q_vals_death[2])
-    axs[2].set_title("1 step from collision")
-    axs[2].legend(labels, loc="lower left")
-    axs[2].set_xlabel("Episode")
-    fig.suptitle("Predicted Q-values for rightward agent on collision course", fontsize=14)
-    plt.show()
+    # fig, axs = plt.subplots(3, 1, sharex=True)
+    # axs[0].plot(x,q_vals_death[0])
+    # axs[0].set_title("3 steps from collision")
+    # axs[0].legend(labels, loc="lower left")
+    # axs[1].plot(x,q_vals_death[1])
+    # axs[1].set_title("2 steps from collision")
+    # axs[1].legend(labels, loc="lower left")
+    # axs[1].set_ylabel("Predicted Q-value")
+    # axs[2].plot(x,q_vals_death[2])
+    # axs[2].set_title("1 step from collision")
+    # axs[2].legend(labels, loc="lower left")
+    # axs[2].set_xlabel("Episode")
+    # fig.suptitle("Predicted Q-values for rightward agent on collision course", fontsize=14)
+    # plt.show()
 
     print("Finished")
 

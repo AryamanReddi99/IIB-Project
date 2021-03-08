@@ -46,7 +46,7 @@ class PedEnv():
         self.agent_pos = np.copy(self.original_agent_pos)
         self.target_pos = np.copy(self.original_target_pos)
 
-        return *self.update_state(), self.reward_list, self.done_list, self.collided_list, self.reached_list, self.breached_list, self.done
+        return (*self.update_state(), self.reward_list, self.done_list, self.collided_list, self.reached_list, self.breached_list, self.done)
 
     def _check_collision_ball(self, pos1, pos2):
         """
@@ -176,16 +176,15 @@ class PedEnv():
         if all(self.done_list):
             self.done = 1
 
-        return *self.update_state(), self.reward_list, self.done_list, self.collided_list, self.reached_list, self.breached_list, self.done
+        return (*self.update_state(), self.reward_list, self.done_list, self.collided_list, self.reached_list, self.breached_list, self.done)
 
 def main():
-    gameconfig = gameconfig(
+    gameconfig = GameConfig(
         env_size=256,
         config=1,
         speed=4,
         num_agents=2,
-        agent_size=5,
-        posconfig=posconfig)
+        agent_size=5)
     env = PedEnv(gameconfig)
     print("Finished")
 
