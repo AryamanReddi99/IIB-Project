@@ -41,7 +41,7 @@ class CNN():
         self.learning_rate = nn_config.learning_rate
         self.tensorboard = nn_config.tensorboard
         self.epochs = nn_config.epochs
-        self.target_network_iter = nn_config.target_network_iter
+        self.target_model_iter = nn_config.target_model_iter
 
         ## Buffers
         # stores last 2 sets of agent positions
@@ -115,7 +115,7 @@ class CNN():
             return
         if len(self.replay_buffer) < self.epoch_size:
             return
-        if move_total%self.target_network_iter==0:
+        if move_total%self.target_model_iter==0:
             self._update_target_model()
         self.replay_sample = self._get_replay_sample()
         self._experience_replay()
@@ -300,7 +300,7 @@ class NNConfig():
                 learning_rate = 0.001,
                 tensorboard = False,
                 epochs = 1,
-                target_network_iter = 10
+                target_model_iter = 10
                 ):
 
         self.mode = mode
@@ -314,7 +314,7 @@ class NNConfig():
         self.learning_rate = learning_rate
         self.tensorboard = tensorboard
         self.epochs = epochs
-        self.target_network_iter = target_network_iter
+        self.target_model_iter = target_model_iter
 
 ################################# External Functions/Classes ##############################
 

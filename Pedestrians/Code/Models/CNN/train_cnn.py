@@ -56,7 +56,7 @@ nn_config = NNConfig(
     final_epsilon=0.01,
     min_epsilon=0.01,
     learning_rate = 0.001,
-    tensorboard = True,
+    tensorboard = False,
     target_model_iter = 10)
 cnn = CNN(gameconfig,nn_config)
 if load_model:
