@@ -67,6 +67,8 @@ class CNN():
 
     def load_cnn(self, path):
         self.model = load_model(path)
+        self.target_model = load_model(path)
+        self._update_target_model()
 
     def create_cnn(self):
         """
