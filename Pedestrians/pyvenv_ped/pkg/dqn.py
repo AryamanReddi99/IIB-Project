@@ -139,33 +139,33 @@ class CNN():
         # Input, Conv 1
         model.add(Conv2D(32, (3,3), input_shape=(self.env_size,self.env_size,self.channels), padding='same', activation='relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.2))
-        model.add(BatchNormalization())
+        #model.add(Dropout(0.2))
+        #model.add(BatchNormalization())
 
         # conv 2
         model.add(Conv2D(64, (3,3), padding='same', activation='relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.2))
-        model.add(BatchNormalization())
+        #model.add(Dropout(0.2))
+        #model.add(BatchNormalization())
 
         # conv 3
         model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.2))
-        model.add(BatchNormalization())
+        #model.add(Dropout(0.2))
+        #model.add(BatchNormalization())
 
         # Flatten
         model.add(Flatten())
 
         # Dense 1
         model.add(Dense(256, activation='relu'))
-        model.add(Dropout(0.2))
-        model.add(BatchNormalization())
+        #model.add(Dropout(0.2))
+        #model.add(BatchNormalization())
 
         # Dense 2
         model.add(Dense(128, activation='relu'))
-        model.add(Dropout(0.2))
-        model.add(BatchNormalization())
+        #model.add(Dropout(0.2))
+        #model.add(BatchNormalization())
 
         # output
         model.add(Dense(self.num_actions))
