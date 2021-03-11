@@ -20,6 +20,7 @@ class CNN():
     - calculate epsilon
     - execute actions
     - preprocess data
+    - create target model
     """
     def __init__(self, gameconfig, nn_config):
         ## gameconfig
