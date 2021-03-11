@@ -57,7 +57,7 @@ nn_config = NNConfig(
     min_epsilon=0.01,
     learning_rate = 0.001,
     tensorboard = True,
-    target_network_iter = 10)
+    target_model_iter = 10)
 cnn = CNN(gameconfig,nn_config)
 if load_model:
     cnn.load_cnn(load_model_fn)
