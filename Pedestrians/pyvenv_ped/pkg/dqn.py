@@ -41,7 +41,7 @@ class CNN():
         self.learning_rate = nn_config.learning_rate
         self.tensorboard = nn_config.tensorboard
         self.epochs = nn_config.epochs
-        self.target_model_iter = nn_config.target_model_iter
+        self.target_network_iter = nn_config.target_network_iter
 
         ## Buffers
         # stores last 2 sets of agent positions
@@ -69,6 +69,7 @@ class CNN():
         """
         self.model = self._create_sequential()
         self.target_model = self._create_sequential()
+        self._update_target_model()
 
     def update_pos_buffers(self, agent_pos, target_pos):
         # Agents
@@ -109,12 +110,12 @@ class CNN():
             action_list[agent] = action
         return action_list
 
-    def train(self, move):
+    def train(self, move_total):
         if self.mode == "testing":
             return
         if len(self.replay_buffer) < self.epoch_size:
             return
-        if move%self.target_model_iter==0:
+        if move_total%self.target_network_iter==0:
             self._update_target_model()
         self.replay_sample = self._get_replay_sample()
         self._experience_replay()
@@ -221,7 +222,7 @@ class CNN():
         target_qvals = self.model.predict(states_batch)
 
         # Predicted new state q values
-        new_states_qvals = self.model.predict(new_states_batch)
+        new_states_qvals = self.target_model.predict(new_states_batch)
 
         # Train on each experience
         for i, (state,action,reward,new_state_qvals,done) in enumerate(zip(states,actions,rewards,new_states_qvals,dones)): 
@@ -299,7 +300,7 @@ class NNConfig():
                 learning_rate = 0.001,
                 tensorboard = False,
                 epochs = 1,
-                target_model_iter = 10
+                target_network_iter = 10
                 ):
 
         self.mode = mode
@@ -313,7 +314,7 @@ class NNConfig():
         self.learning_rate = learning_rate
         self.tensorboard = tensorboard
         self.epochs = epochs
-        self.target_model_iter = target_model_iter
+        self.target_network_iter = target_network_iter
 
 ################################# External Functions/Classes ##############################
 

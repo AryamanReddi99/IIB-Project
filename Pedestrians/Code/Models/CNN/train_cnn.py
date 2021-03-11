@@ -71,8 +71,8 @@ max_game_length = 50
 # q_vals_death = np.zeros((3,200,5))
 # labels = ['dont move', 'up', 'down', 'left',' right']
 
-
 # Begin Training
+move_total = 0
 for game in tqdm(range(gameconfig.games)):
     # Reset Board
     stop_list = [False for _ in range(gameconfig.num_agents)] # stop recording experiences
@@ -123,7 +123,7 @@ for game in tqdm(range(gameconfig.games)):
             cnn.update_experiences(agent, action_list, reward_list, done_list)
 
         # Train
-        cnn.train()
+        cnn.train(move_total)
 
         # Display Data
         display_info = DisplayInfo(
@@ -147,6 +147,8 @@ for game in tqdm(range(gameconfig.games)):
                 time.sleep(0.2)
             break
 
+        # Update total moves
+        move_total+=1
 # Store Model
 if store_model:
     cnn.model.save(store_model_fn)
