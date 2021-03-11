@@ -19,7 +19,7 @@ sep = os.path.sep # system path seperator
 os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
 fn = Path(__file__).stem # this filename
 store_model_fn = f"..{sep}Saved{sep}" + fn + datetime.datetime.now().strftime("-%d-%m-%y_%H-%M") + f"{sep}Model"
-load_model_fn = "..\\Saved\\train_cnn-11-03-21_19-58\\Model".replace(sep,"/")
+load_model_fn = "..\\Saved\\train_cnn-11-03-21_19-58\\Model".replace("\\","/")
 
 # Storage Triggers
 store_img = True
