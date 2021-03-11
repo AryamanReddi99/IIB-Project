@@ -288,6 +288,7 @@ class NNConfig():
     mode:
     "training" -> works as normal
     "testing" -> doesn't explore (epsilon = 0)
+    epoch size = number of samples used in one epoch
     """
     def __init__(self,
                 mode = "training",
