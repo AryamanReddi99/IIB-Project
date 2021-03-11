@@ -35,7 +35,7 @@ gameconfig = GameConfig(
     agent_size=8,
     channels=4,
     num_actions=5,
-    games=100,
+    games=50,
     doom=False)
 env = PedEnv(gameconfig)
 
@@ -56,7 +56,7 @@ nn_config = NNConfig(
     final_epsilon=0.01,
     min_epsilon=0.01,
     learning_rate = 0.001,
-    tensorboard = False,
+    tensorboard = True,
     target_model_iter = 10)
 cnn = CNN(gameconfig,nn_config)
 if load_model:
