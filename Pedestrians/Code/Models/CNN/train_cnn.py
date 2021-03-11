@@ -41,7 +41,7 @@ env = PedEnv(gameconfig)
 
 # Create Display
 screenconfig = ScreenConfig(
-    headless = False,
+    headless = True,
     border_size=10)
 window = Window(screenconfig, gameconfig)
 
