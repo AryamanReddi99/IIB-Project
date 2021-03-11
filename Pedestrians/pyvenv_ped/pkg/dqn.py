@@ -58,6 +58,10 @@ class CNN():
         log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         self.tensorboard_callback = TensorBoard(log_dir, histogram_freq=1)
 
+        # Metrics
+        self.accuracy = []
+        self.loss = []
+
     def save_cnn(self, path):
         self.model.save(path)
 
@@ -252,6 +256,8 @@ class CNN():
                     verbose=1)
         loss = history.history['loss'][0]
         accuracy = history.history['accuracy'][0]
+        self.loss.append(loss)
+        self.accuracy.append(accuracy)
 
     def _get_epsilon(self, game):
         """

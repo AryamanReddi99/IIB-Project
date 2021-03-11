@@ -35,7 +35,7 @@ gameconfig = GameConfig(
     agent_size=8,
     channels=4,
     num_actions=5,
-    games=50,
+    games=100,
     doom=False)
 env = PedEnv(gameconfig)
 
