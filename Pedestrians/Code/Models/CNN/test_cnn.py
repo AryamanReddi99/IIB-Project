@@ -19,7 +19,7 @@ def main():
     # Model Location
     sep = os.path.sep
     os.chdir(os.path.dirname(__file__).replace(sep,sep))
-    load_model_fn = "..\\Saved\\train_cnn-26-02-21_12-58".replace(sep,"/")
+    load_model_fn = "..\\Saved\\train_cnn-11-03-21_01-53\\Model".replace(sep,"/")
     # Create Environment
     gameconfig = GameConfig(
         env_size=64,
@@ -29,7 +29,7 @@ def main():
         agent_size=8,
         channels=4,
         num_actions=5,
-        games=10,
+        games=100,
         doom=False)
     env = PedEnv(gameconfig)
 
@@ -68,8 +68,8 @@ def main():
 
         # Display Data
         display_info = DisplayInfo(
-            agent_pos = [pos2pygame(agent_1, gameconfig.env_size), pos2pygame(agent_2, gameconfig.env_size)],
-            target_pos = [pos2pygame(target_1, gameconfig.env_size), pos2pygame(target_2, gameconfig.env_size)],
+            agent_pos = [float2pygame(agent_1, gameconfig.env_size), float2pygame(agent_2, gameconfig.env_size)],
+            target_pos = [float2pygame(target_1, gameconfig.env_size), float2pygame(target_2, gameconfig.env_size)],
             action_list = [0, 0],
             reward_list = reward_list,
             done_list = done_list,
@@ -88,7 +88,7 @@ def main():
             action_list = cnn.act(game, done_list)
 
             # For testing collisions/targets
-            action_list = [cnn._action_space_sample(),cnn._action_space_sample()]
+            #action_list = [cnn._action_space_sample(),cnn._action_space_sample()]
 
             # Take Actions
             [agent_1, agent_2], [target_1, target_2], reward_list, done_list, collided_list, reached_list, breached_list, done = env.step(action_list)
@@ -98,8 +98,8 @@ def main():
 
             # Display Data
             display_info = DisplayInfo(
-                agent_pos = [pos2pygame(agent_1, gameconfig.env_size), pos2pygame(agent_2, gameconfig.env_size)],
-                target_pos = [pos2pygame(target_1, gameconfig.env_size), pos2pygame(target_2, gameconfig.env_size)],
+                agent_pos = [float2pygame(agent_1, gameconfig.env_size), float2pygame(agent_2, gameconfig.env_size)],
+                target_pos = [float2pygame(target_1, gameconfig.env_size), float2pygame(target_2, gameconfig.env_size)],
                 action_list = action_list,
                 reward_list = reward_list,
                 done_list = done_list,

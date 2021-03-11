@@ -1,9 +1,12 @@
 import collections
 import random
+import datetime
 import numpy as np
+import tensorflow as tf
 from keras.optimizers import Adam
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, Flatten, BatchNormalization, Activation, Conv2D, MaxPooling2D
+from tensorflow.keras.callbacks import TensorBoard
 from .general import *
 
 class CNN():
@@ -31,10 +34,14 @@ class CNN():
         self.gamma = nn_config.gamma
         self.mem_max_size = nn_config.mem_max_size
         self.minibatch_size = nn_config.minibatch_size
+        self.epoch_size = nn_config.epoch_size
         self.frac_random = nn_config.frac_random
         self.final_epsilon = nn_config.final_epsilon
         self.min_epsilon = nn_config.min_epsilon
         self.learning_rate = nn_config.learning_rate
+        self.tensorboard = nn_config.tensorboard
+        self.epochs = nn_config.epochs
+        self.target_model_iter = nn_config.target_model_iter
 
         ## Buffers
         # stores last 2 sets of agent positions
@@ -46,6 +53,10 @@ class CNN():
         # stores experiences
         self.replay_buffer = collections.deque(maxlen=nn_config.mem_max_size)
 
+        # Tensorboard
+        log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        self.tensorboard_callback = TensorBoard(log_dir, histogram_freq=1)
+
     def save_cnn(self, path):
         self.model.save(path)
 
@@ -54,51 +65,10 @@ class CNN():
 
     def create_cnn(self):
         """
-        Creates Sequential CNN
+        Creates CNN and Target CNN
         """
-        model = Sequential()
-
-        # Input, Conv 1
-        model.add(Conv2D(32, (3,3), input_shape=(self.env_size,self.env_size,self.channels), padding='same', activation='relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.2))
-        model.add(BatchNormalization())
-
-        # conv 2
-        model.add(Conv2D(64, (3,3), padding='same', activation='relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.2))
-        model.add(BatchNormalization())
-
-        # conv 3
-        # model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
-        # model.add(MaxPooling2D(pool_size=(2, 2)))
-        # model.add(Dropout(0.2))
-        # model.add(BatchNormalization())
-
-        # Flatten
-        model.add(Flatten())
-
-        # Dense 1
-        model.add(Dense(256, activation='relu'))
-        model.add(Dropout(0.2))
-        model.add(BatchNormalization())
-
-        # Dense 2
-        model.add(Dense(128, activation='relu'))
-        model.add(Dropout(0.2))
-        model.add(BatchNormalization())
-
-        # output
-        model.add(Dense(self.num_actions))
-
-        # compile
-        model.compile(
-            loss='mean_squared_error',
-            optimizer=Adam(learning_rate=self.learning_rate),
-            metrics=['accuracy'])
-
-        self.model = model
+        self.model = self._create_sequential()
+        self.target_model = self._create_sequential()
 
     def update_pos_buffers(self, agent_pos, target_pos):
         # Agents
@@ -139,13 +109,14 @@ class CNN():
             action_list[agent] = action
         return action_list
 
-    def train(self):
+    def train(self, move):
         if self.mode == "testing":
             return
-        if len(self.replay_buffer) < self.minibatch_size:
+        if len(self.replay_buffer) < self.epoch_size:
             return
+        if move%self.target_model_iter==0:
+            self._update_target_model()
         self.replay_sample = self._get_replay_sample()
-        #self.replay_sample = self.replay_buffer.replay_sample(self.minibatch_size)
         self._experience_replay()
 
     def update_experiences(self, agent, action_list, reward_list, done_list):
@@ -154,6 +125,57 @@ class CNN():
         """
         experience = Experience(self.state_buffer[-2][agent], action_list[agent], reward_list[agent], self.state_buffer[-1][agent], done_list[agent])
         self.replay_buffer.append(experience)
+
+    def _update_target_model(self):
+        self.target_model.set_weights(self.model.get_weights())
+
+    def _create_sequential(self):
+        """
+        creates sequential cnn
+        """
+        model = Sequential()
+
+        # Input, Conv 1
+        model.add(Conv2D(32, (3,3), input_shape=(self.env_size,self.env_size,self.channels), padding='same', activation='relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Dropout(0.2))
+        model.add(BatchNormalization())
+
+        # conv 2
+        model.add(Conv2D(64, (3,3), padding='same', activation='relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Dropout(0.2))
+        model.add(BatchNormalization())
+
+        # conv 3
+        model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Dropout(0.2))
+        model.add(BatchNormalization())
+
+        # Flatten
+        model.add(Flatten())
+
+        # Dense 1
+        model.add(Dense(256, activation='relu'))
+        model.add(Dropout(0.2))
+        model.add(BatchNormalization())
+
+        # Dense 2
+        model.add(Dense(128, activation='relu'))
+        model.add(Dropout(0.2))
+        model.add(BatchNormalization())
+
+        # output
+        model.add(Dense(self.num_actions))
+
+        # compile
+        model.compile(
+            loss='mean_squared_error',
+            optimizer=Adam(learning_rate=self.learning_rate),
+            metrics=['accuracy'])
+
+        return model
 
     def _update_state_buffer(self):
         """
@@ -179,7 +201,7 @@ class CNN():
         self.state_buffer.append(states)
 
     def _get_replay_sample(self):
-        indices = np.random.choice(len(self.replay_buffer), self.minibatch_size, replace=False)
+        indices = np.random.choice(len(self.replay_buffer), self.epoch_size, replace=False)
         states, actions, rewards, new_states, dones = zip(*[self.replay_buffer[index] for index in indices])
         return np.array(states), np.array(actions), np.array(rewards), np.array(new_states), np.array(dones)
 
@@ -208,7 +230,26 @@ class CNN():
             else:
                 target_qval = reward + self.gamma * np.max(new_state_qvals)
             target_qvals[i][action] = target_qval
-        self.history = self.model.fit(states_batch, target_qvals, batch_size=self.minibatch_size, epochs=1, verbose=1)
+        self._cnn_fit(states_batch, target_qvals, self.epochs)
+    
+    def _cnn_fit(self,x,y,epochs):
+        if self.tensorboard:
+            history = self.model.fit(
+                    x=x, 
+                    y=y, 
+                    batch_size=self.minibatch_size, 
+                    epochs=epochs, 
+                    verbose=1,
+                    callbacks=[self.tensorboard_callback])
+        else:
+            history = self.model.fit(
+                    x=x, 
+                    y=y, 
+                    batch_size=self.minibatch_size, 
+                    epochs=epochs, 
+                    verbose=1)
+        loss = history.history['loss'][0]
+        accuracy = history.history['accuracy'][0]
 
     def _get_epsilon(self, game):
         """
@@ -251,20 +292,28 @@ class NNConfig():
                 gamma = 0.6,
                 mem_max_size = 1000,
                 minibatch_size = 32,
+                epoch_size = 64,
                 frac_random = 0.1,
                 final_epsilon = 0.01,
                 min_epsilon = 0.01,
-                learning_rate = 0.001
+                learning_rate = 0.001,
+                tensorboard = False,
+                epochs = 1,
+                target_model_iter = 10
                 ):
 
         self.mode = mode
         self.gamma = gamma
         self.mem_max_size = mem_max_size
         self.minibatch_size = minibatch_size
+        self.epoch_size = epoch_size
         self.frac_random = frac_random
         self.final_epsilon = final_epsilon
         self.min_epsilon = min_epsilon
         self.learning_rate = learning_rate
+        self.tensorboard = tensorboard
+        self.epochs = epochs
+        self.target_model_iter = target_model_iter
 
 ################################# External Functions/Classes ##############################
 

@@ -3,10 +3,9 @@ import time
 import random
 import pygame
 import pygame.freetype
-from win32api import GetSystemMetrics
+#from win32api import GetSystemMetrics
 from pygame.locals import *
-from pkg.general import *
-from pkg.env import *
+from .general import *
 
 class Window():
     def __init__(self, screenconfig, gameconfig):
@@ -67,9 +66,9 @@ class Window():
             font_size = 5
         else:
             font_size = 25
+        font_0 = pygame.freetype.SysFont(None, font_size)
         font_1 = pygame.freetype.SysFont("constantia", font_size)
         font_2 = pygame.freetype.SysFont("couriernew", 10)
-        font_3 = pygame.freetype.Font(pkg_path + f"Doom{sep}DooM.ttf", 22)
         self.font = font_1
 
         # Create screens and surfaces
@@ -91,6 +90,7 @@ class Window():
         if self.doom:
             self.cacodemon_left = pygame.image.load(pkg_path + f'Doom{sep}caco_left.png')
             self.cacodemon_right = pygame.image.load(pkg_path + f'Doom{sep}caco_right.png')
+            font_3 = pygame.freetype.Font(pkg_path + f"Doom{sep}DooM.ttf", 22)
             self.font = font_3
             self.agent_size = 16
 
@@ -228,8 +228,10 @@ class Window():
                     self.pause = True
             # RESIZE event
             elif event.type == VIDEORESIZE:
-                screen_width = GetSystemMetrics(0)
-                screen_height = GetSystemMetrics(1)
+                # screen_width = GetSystemMetrics(0)
+                # screen_height = GetSystemMetrics(1)
+                screen_width = 1500
+                screen_height = 1000
                 if min(event.size) > 0.9 * screen_height:  # going fullscreen
                     self.screen = pygame.display.set_mode(
                         (screen_width, int(screen_width * 0.5)), DOUBLEBUF | RESIZABLE)
