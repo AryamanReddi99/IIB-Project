@@ -105,6 +105,24 @@ def which_wall(pos):
             return "top"
     raise ValueError("Not a wall!")
 
+def create_wall(wall, size):
+    """
+    returns a wall target for a given env size
+    wall format is list of 2-D numpy arrays with coordinates of wall
+    wall coordinates must be at edges of environment
+    """
+    if wall=="top":
+        wall = [np.array([i, size - 1]) for i in range(0, size)]
+    elif wall=="bottom":
+        wall = [np.array([i, 0]) for i in range(0, size)]
+    elif wall=="left":
+        wall = [np.array([0, i]) for i in range(0, size)]
+    elif wall=="right":
+        wall = [np.array([size - 1, i]) for i in range(0, size)]
+    else:
+        raise ValueError("Incorrect argument for wall")
+    return wall
+
 def pretty_state(state):
     """
     coverts a model-friendly state into something readable
@@ -147,6 +165,7 @@ class _PosConfig():
     10-19: wall targets
     10 - random (tba)
     11 - crossing parallel pathways
+    12 - crossing perpendicular pathways
     """
 
     def __init__(self, size):
@@ -155,7 +174,8 @@ class _PosConfig():
             0:  self.config_0(), 
             1:  self.config_1(), 
             2:  self.config_2(), 
-            11: self.config_11()}
+            11: self.config_11(),
+            12: self.config_12()}
 
     def config_0(self):
         """
@@ -218,12 +238,26 @@ class _PosConfig():
         """
         crossing parallel pathways, 2 agents
         """
-        x = self.size / 16
-        y = self.size / 16
-        agent_1 = np.array([1, y * 8])
-        agent_2 = np.array([self.size - 2, y * 8])
-        target_1 = [np.array([self.size - 1, i]) for i in range(0, self.size)]
-        target_2 = [np.array([0, i]) for i in range(0, self.size)]
+        x = self.size / 2
+        y = self.size / 2
+        agent_1 = np.array([1, y])
+        agent_2 = np.array([self.size - 2, y])
+        target_1 = create_wall("right", self.size)
+        target_2 = create_wall("left", self.size)
+        return {
+            "agents": [agent_1, agent_2],
+            "targets": [target_1, target_2]}
+
+    def config_12(self):
+        """
+        crossing perpendicular paths, 2 agents
+        """
+        x = self.size / 2
+        y = self.size / 2
+        agent_1 = np.array([1, y - 1])
+        agent_2 = np.array([x, self.size - 2])
+        target_1 = create_wall("right", self.size)
+        target_2 = create_wall("bottom", self.size)
         return {
             "agents": [agent_1, agent_2],
             "targets": [target_1, target_2]}
@@ -262,7 +296,8 @@ class GameConfig():
         self.doom = doom
 
 def main():
-    print(pos2pygame(np.array([3,4]), 10))
+    posconfig = _PosConfig(64)
+    print(posconfig.configs)
 
 
 if __name__ == "__main__":

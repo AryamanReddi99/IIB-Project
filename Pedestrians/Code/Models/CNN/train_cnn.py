@@ -29,7 +29,7 @@ load_model = False
 # Create Environment
 gameconfig = GameConfig(
     env_size=64,
-    config=11,
+    config=12,
     speed=10,
     num_agents=2,
     agent_size=8,
@@ -41,7 +41,7 @@ env = PedEnv(gameconfig)
 
 # Create Display
 screenconfig = ScreenConfig(
-    headless = True,
+    headless = False,
     border_size=10)
 window = Window(screenconfig, gameconfig)
 

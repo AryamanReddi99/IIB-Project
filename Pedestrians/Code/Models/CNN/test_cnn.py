@@ -19,7 +19,7 @@ def main():
     # Model Location
     sep = os.path.sep
     os.chdir(os.path.dirname(__file__).replace(sep,sep))
-    load_model_fn = "..\\Saved\\train_cnn-11-03-21_17-31\\Model".replace(sep,"/")
+    load_model_fn = "..\\Saved\\train_cnn-11-03-21_18-39\\Model".replace(sep,"/")
     # Create Environment
     gameconfig = GameConfig(
         env_size=64,
