@@ -29,6 +29,7 @@ class PedEnv():
         self.done = 0
         self.reward_death = -3
         self.reward_target = 3
+        self.reward_stat = 0
         self.reward_move = -0.1
 
     def reset(self):
@@ -170,6 +171,8 @@ class PedEnv():
             elif self.reached_list[agent]:
                 self.reward_list[agent] = self.reward_target
                 self.done_list[agent] = True
+            elif actions[agent] == 0:
+                self.reward_list[agent] = self.reward_stat
             else:
                 self.reward_list[agent] = self.reward_move
 

@@ -58,6 +58,9 @@ def main():
     # Game Parameters
     max_game_length = 50
 
+    ### Diagnostics
+    total_rewards = []
+
     # Begin Training
     for game in tqdm(range(gameconfig.games)):
         # Reset Board
@@ -80,6 +83,9 @@ def main():
             game = game,
             move = 0)
         window.display(display_info=display_info) # display info on pygame screen
+
+        ### Diagnostics
+        total_reward = 0
 
         # Play Game
         for move in range(1, max_game_length):
@@ -111,9 +117,17 @@ def main():
                 move = move)
             window.display(display_info=display_info) # display info on pygame screen
 
+            ### Diagnostics
+            for agent in range(gameconfig.num_agents):
+                if stop_list[agent]:
+                    # Don't record rewards after agent is done
+                    continue
+                total_reward += reward_list[agent]
+
             # Update stop_list, check if done:
             stop_list = done_list
-            if done:
+            if done or move==max_game_length-1:
+                total_rewards.append(total_reward)
                 time.sleep(1)
                 break
 

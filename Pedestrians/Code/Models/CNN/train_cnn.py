@@ -24,7 +24,7 @@ load_model_fn = "..\\Saved\\train_cnn-11-03-21_19-58\\Model".replace("\\","/")
 # Storage Triggers
 store_img = True
 store_model = True
-load_model = True
+load_model = False
 
 # Create Environment
 gameconfig = GameConfig(
