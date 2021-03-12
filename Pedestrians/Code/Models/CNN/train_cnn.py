@@ -68,6 +68,7 @@ else:
 max_game_length = 50
 
 ### Diagnostics
+total_rewards = []
 
 # Begin Training
 move_total = 0
@@ -97,6 +98,7 @@ for game in tqdm(range(gameconfig.games)):
     for move in range(0, max_game_length):
 
         ### Diagnostics
+        total_reward = 0
 
         # Get CNN Actions
         action_list = cnn.act(game, done_list)
@@ -134,6 +136,13 @@ for game in tqdm(range(gameconfig.games)):
             game = game,
             move = move)
         window.display(display_info=display_info) # display info on pygame screen
+
+        ### Diagnostics
+        for agent in range(gameconfig.num_agents):
+            if stop_list[agent]:
+                # Don't record rewards after agent is done
+                continue
+            total_reward += reward_list[agent]
 
         # Stop list is delayed done list
         stop_list = np.copy(done_list)
