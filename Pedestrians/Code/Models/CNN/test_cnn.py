@@ -9,8 +9,7 @@ from pkg.env import *
 from pkg.dqn import *
 from pkg.window import *
 
-# Miscellaneous
-pp = pprint.PrettyPrinter(indent=4)
+
 
 # Storage Triggers
 store_img = True
@@ -21,12 +20,12 @@ load_model = True
 sep = os.path.sep # system path seperator
 os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
 fn = Path(__file__).stem # this filename
-load_model_fn = "..\\Saved\\train_cnn-11-03-21_19-58\\Model".replace("\\","/")
+load_model_fn = "..\\Saved\\Perpendicular\\train_cnn-11-03-21_19-58\\Model".replace("\\","/")
 
 # Create Environment
 gameconfig = GameConfig(
     env_size=64,
-    config=12,
+    config=11,
     speed=10,
     num_agents=2,
     agent_size=8,
@@ -98,7 +97,7 @@ for game in tqdm(range(gameconfig.games)):
         # For testing collisions/targets
         #action_list = [cnn._action_space_sample(),cnn._action_space_sample()]
 
-        # Take Actions
+        # Take Actions 
         [agent_1, agent_2], [target_1, target_2], reward_list, done_list, collided_list, reached_list, breached_list, done = env.step(action_list)
         
         # Record States
