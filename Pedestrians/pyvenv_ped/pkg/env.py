@@ -29,7 +29,7 @@ class PedEnv():
         self.done = 0
         self.reward_death = -3
         self.reward_target = 3
-        self.reward_stat = 0
+        self.reward_stat = -0.1
         self.reward_move = -0.1
 
     def reset(self):

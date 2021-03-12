@@ -14,7 +14,7 @@ from pkg.window import *
 # Miscellaneous
 pp = pprint.PrettyPrinter(indent=4)
 
-# Data Storage Paths
+# Data Paths
 sep = os.path.sep # system path seperator
 os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
 fn = Path(__file__).stem # this filename
@@ -69,9 +69,9 @@ max_game_length = 50
 
 ### Diagnostics
 total_rewards = []
+move_total = 0
 
 # Begin Training
-move_total = 0
 for game in tqdm(range(gameconfig.games)):
     # Reset Board
     stop_list = [False for _ in range(gameconfig.num_agents)] # stop recording experiences
@@ -94,11 +94,11 @@ for game in tqdm(range(gameconfig.games)):
         move = 0)
     window.display(display_info=display_info) # display info on pygame screen
 
+    ### Diagnostics
+    total_reward = 0
+
     # Play Game
     for move in range(0, max_game_length):
-
-        ### Diagnostics
-        total_reward = 0
 
         # Get CNN Actions
         action_list = cnn.act(game, done_list)
@@ -144,9 +144,10 @@ for game in tqdm(range(gameconfig.games)):
                 continue
             total_reward += reward_list[agent]
 
-        # Stop list is delayed done list
+        # Stop list is done list lagged by 1
         stop_list = np.copy(done_list)
-        if done:
+        if done or move==max_game_length-1:
+            total_rewards.append(round(total_reward, 2))
             if not screenconfig.headless:
                 time.sleep(0.2)
             break
