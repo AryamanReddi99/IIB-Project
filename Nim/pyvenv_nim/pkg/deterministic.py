@@ -1,12 +1,42 @@
-import numpy as np
-import matplotlib.pyplot as plt
+# deterministic class functions - scalable players, human players
+import random
 
-from nim_programmed_players import *
-from scipy.stats import norm
-
-class game():
+class scalable_player():
     """
-    class which plays single-pile final-pickup Nim between humans or agents
+    Plays optimal moves with probability $skill, 
+    plays randomly with probability 1 - $skill
+    """
+    def __init__(self,skill):
+        self.skill = skill
+    def play(self,state,opts=[]):
+        a = state["n"]
+        while a > state["tot"]:
+            prev_a = a
+            a -= state["i"]+1
+        if a == state["tot"]:
+            if "exploit" in opts:
+                if random.random() <= self.skill:
+                    return 1
+                else:
+                    return random.randint(1,state["i"])
+            else:
+                return random.randint(1,state["i"])
+        optimal_play = prev_a - state["tot"]
+        if random.random() <= self.skill:
+            return optimal_play
+        else:
+            return random.randint(1,state["i"])
+
+class keyboard_player():
+    def __init__(self):
+        pass
+    def play(self,state,opts=None):
+        int_input = int(input(f"Human, enter a number between 1 - {i}: "))
+        return int_input
+
+class deterministic_game():
+    """
+    determinstic single-pile final-pickup game Nim between humans or agents
     """
     def __init__(self,i,lim):
         self.i = i
@@ -48,7 +78,6 @@ class game():
         self.player_flag=1
         self.player_1=player_1
         self.player_2=player_2
-
         if self.verbose:
             print(f"First to exceed {self.lim} loses!")
             print("Input 0 to reset game")
@@ -91,45 +120,3 @@ class game():
             # used to reset a game
             self.tot = 0
             self.player_flag = 1
-
-a = scalable_player(1)
-b = scalable_player(1)
-
-
-game_1 = game(3,24)
-winners = []
-for i in range(1000):
-    winners.append(game_1.play(a,b))
-print(winners)
-
-
-
-
-
-# num_wins_1_list = []
-# for _ in range(big_iter):
-#     num_wins_1 = 0
-#     for _ in range(small_iter):
-#         game_result = game_1.play(a,b)
-#         if game_result == 1:
-#             num_wins_1 += 1 
-#     num_wins_1_list.append(num_wins_1)
-
-# num_wins_2_list = [small_iter-i for i in num_wins_1_list]
-
-# mu1, std1 = norm.fit(num_wins_1_list)
-# mu2, std2 = norm.fit(num_wins_2_list)
-
-# x=np.linspace(20,80,100)
-# p1 = norm.pdf(x, mu1, std1)
-# p2 = norm.pdf(x, mu2, std2)
-# plt.plot(x,p1,color="purple",linewidth=2)
-# plt.plot(x,p2,color="orange", linewidth=2)
-
-
-
-# print(mu1,std1)
-# print(mu2,std2)
-# plt.hist(num_wins_1_list,bins=np.arange(20,81),density=True,color="blue")
-# plt.hist(num_wins_2_list,bins=np.arange(20,81),density=True,color="red")
-# plt.show()
