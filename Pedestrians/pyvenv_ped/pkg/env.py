@@ -32,23 +32,6 @@ class PedEnv():
         self.reward_stat = -0.1
         self.reward_move = -0.1
 
-    def reset(self):
-        # Done Agents
-        self.done = 0
-        self.done_list = [False for _ in range(self.num_agents)]
-        self.collided_list = [False for _ in range(self.num_agents)]
-        self.reached_list = [False for _ in range(self.num_agents)]
-        self.breached_list = [False for _ in range(self.num_agents)]
-
-        # Rewards
-        self.reward_list = [None for _ in range(self.num_agents)]
-
-        # Agent/Target Positions
-        self.agent_pos = np.copy(self.original_agent_pos)
-        self.target_pos = np.copy(self.original_target_pos)
-
-        return (*self.update_state(), self.reward_list, self.done_list, self.collided_list, self.reached_list, self.breached_list, self.done)
-
     def _check_collision_ball(self, pos1, pos2):
         """
         check if agent has collided with agent or target
@@ -111,15 +94,17 @@ class PedEnv():
                     self.breached_list[agent] = True
         return self.breached_list
 
-    def update_state(self):
+    def _update_state(self):
         """
         Check Boundaries
         """
         if self.config < 10:
+            # Ball targets
             for pos in self.agent_pos:
                 pos[0] = bound(0, self.env_size - 1, pos[0])
                 pos[1] = bound(0, self.env_size - 1, pos[1])
         elif self.config < 20:
+            # Wall targets
             for agent, pos in enumerate(self.agent_pos):
                 if self.breached_list[agent]:
                     pos[0] = self.original_agent_pos[agent][0]
@@ -131,6 +116,23 @@ class PedEnv():
         reward function e^-x, x = proximity to target
         """
         return
+
+    def reset(self):
+        # Done Agents
+        self.done = 0
+        self.done_list = [False for _ in range(self.num_agents)]
+        self.collided_list = [False for _ in range(self.num_agents)]
+        self.reached_list = [False for _ in range(self.num_agents)]
+        self.breached_list = [False for _ in range(self.num_agents)]
+
+        # Rewards
+        self.reward_list = [None for _ in range(self.num_agents)]
+
+        # Agent/Target Positions
+        self.agent_pos = np.copy(self.original_agent_pos)
+        self.target_pos = np.copy(self.original_target_pos)
+
+        return (*self._update_state(), self.reward_list, self.done_list, self.collided_list, self.reached_list, self.breached_list, self.done)
 
     def action_space_sample(self):
         """
@@ -156,7 +158,7 @@ class PedEnv():
                 # right
                 self.agent_pos[agent][0] += self.speed
 
-        self.update_state()
+        self._update_state()
         self._return_collided()
         self._return_reached()
         self._return_breached()
@@ -179,7 +181,9 @@ class PedEnv():
         if all(self.done_list):
             self.done = 1
 
-        return (*self.update_state(), self.reward_list, self.done_list, self.collided_list, self.reached_list, self.breached_list, self.done)
+        return (*self._update_state(), self.reward_list, self.done_list, self.collided_list, self.reached_list, self.breached_list, self.done)
+
+####################################### main() ####################################
 
 def main():
     gameconfig = GameConfig(

@@ -2,6 +2,12 @@ import numpy as np
 from random import randint
 from collections import OrderedDict
 
+def bound(low, high, value):
+    """
+    Bounds value between low, high
+    """
+    return max(low, min(high, value))
+
 def float2mat(pos, size):
     """
     Converts position in np.array x-y format into square matrix
@@ -103,7 +109,7 @@ def which_wall(pos):
         # Top
         elif pos[0][1] == env_size - 1:
             return "top"
-    raise ValueError("Not a wall!")
+    raise ValueError("Invalid wall!")
 
 def create_wall(wall, size):
     """
@@ -144,12 +150,6 @@ def pretty_experience(experience):
     pretty_experience["new_state"] = pretty_state(new_state)
     pretty_experience["done"] = done
     return pretty_experience
-
-def bound(low, high, value):
-    """
-    Bounds value between low, high
-    """
-    return max(low, min(high, value))
 
 class _PosConfig():
     """
@@ -279,7 +279,7 @@ class GameConfig():
         self.posconfig = _PosConfig(env_size)
         self.pos_dict_initial = self.posconfig.configs[config].copy()
 
-        # Game parameters
+        # Game Parameters
         self.env_size = env_size
         self.config = config
         self.speed = speed
@@ -295,10 +295,11 @@ class GameConfig():
         # Doom
         self.doom = doom
 
+####################################### main() ####################################
+
 def main():
     posconfig = _PosConfig(64)
     print(posconfig.configs)
-
 
 if __name__ == "__main__":
     main()

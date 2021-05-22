@@ -3,6 +3,8 @@ import os
 from pygame.locals import *
 from pathlib import Path
 
+####################################### main() ####################################
+
 def main():
     l1 = (1,2,3,4,5)
     l2 = (1,44,5,3,5)

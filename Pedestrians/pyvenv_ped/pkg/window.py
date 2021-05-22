@@ -306,6 +306,8 @@ class DisplayInfo():
         self.game = game
         self.move = move
 
+####################################### main() ####################################
+
 def main():
     gameconfig = GameConfig(
         env_size=256,
