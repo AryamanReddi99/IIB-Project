@@ -21,7 +21,7 @@ from pkg.deterministic import *
 
 # Run Script from Colab
 args = sys.argv
-i,n,games,start_player,mode,alpha,gamma,frac_random,final_epsilon,min_epsilon,mem_max_size,reward_mode,skill = args
+script,i,n,games,start_player,mode,alpha,gamma,frac_random,final_epsilon,min_epsilon,mem_max_size,reward_mode,skill = args
 
 # Data Paths
 sep = os.path.sep # system path seperator
