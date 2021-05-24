@@ -41,7 +41,7 @@ def table_optimality(i,table):
         optimal = t%(i+1)
         if optimal==0:
             continue
-        elif optimal==np.argmax(row)+1:
+        elif (np.argmax(row)+1==optimal) and (np.count_nonzero(row==np.max(row))==1):
             correct+=1
         evaluatable+=1
     return correct/evaluatable
