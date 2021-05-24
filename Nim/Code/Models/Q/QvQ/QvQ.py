@@ -9,6 +9,9 @@ from pkg.plot import *
 from pkg.q import *
 from pkg.deterministic import *
 
+# In a game of Q vs Q, each intermediate state must be recorded 
+# and used for training.
+
 # Miscellaneous
 random.seed(3)
 

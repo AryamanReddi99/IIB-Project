@@ -22,6 +22,7 @@ class Q():
         self.final_epsilon = q_config.final_epsilon
         self.min_epsilon = q_config.min_epsilon
         self.reward_mode = q_config.reward_mode
+        self.optimal_override = q_config.optimal_override
 
         ## training
         self.trainable = True
@@ -62,6 +63,9 @@ class Q():
             state = self.state_buffer[-1]
             qvals = self.table[state["t"]]
             action = np.argmax(qvals) + 1
+        # override
+        if self.optimal_override:
+            action = optimal_play(i,t)
         return action
 
     def train(self, move_total, reward_list):
@@ -94,7 +98,7 @@ class Q():
             # single learner
             self.game_buffer[-1]._replace(reward=reward_list[self.game_buffer[-1].state["turn"]])
             # double learner
-            if len(self.game_buffer>1) and (self.game_buffer[-1].state["turn"] != self.game_buffer[-2].state["turn"]):
+            if len(self.game_buffer)>1 and (self.game_buffer[-1].state["turn"] != self.game_buffer[-2].state["turn"]):
                 self.game_buffer[-2]._replace(reward=reward_list[self.game_buffer[-2 ].state["turn"]])
             return self.game_buffer
         # Full
@@ -140,7 +144,8 @@ class QConfig():
                 final_epsilon = 0.01,
                 min_epsilon = 0.01,
                 mem_max_size = 1000,
-                reward_mode = 0
+                reward_mode = 0,
+                optimal_override = 0
                 ):
             # Training 
             self.mode = mode
@@ -159,6 +164,11 @@ class QConfig():
             # 1: Sparse - terminal move of either agent
             # 2: Full - terminal rewards propagate through whole game
             self.reward_mode = reward_mode
+
+            # Optimal Override
+            # Switch on to force optimal play - use with caution,
+            # Only for testing
+            self.optimal_override = optimal_override
 
 ################################# External Functions/Classes ##############################
 

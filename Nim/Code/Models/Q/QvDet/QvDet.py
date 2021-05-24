@@ -9,8 +9,14 @@ from pkg.plot import *
 from pkg.q import *
 from pkg.deterministic import *
 
+# In a game of Q-Learner vs deterministic, the q-learner must learn from the states
+# given back by the deterministic player. Since they aren't a learner, this is
+# essentially like playing the environment, thus there is no need to record 
+# intermediate states.
+
+
 # Miscellaneous
-random.seed(0)
+#random.seed(0)
 
 # Data Paths
 sep = os.path.sep # system path seperator
@@ -42,7 +48,7 @@ qconfig = QConfig(
         final_epsilon = 0.001,
         min_epsilon = 0,
         mem_max_size = 1000,
-        reward_mode = 2
+        reward_mode = 0
     )
 q = Q(gameconfig, qconfig)
 if load_model:
@@ -65,32 +71,41 @@ optimalities = np.zeros(gameconfig.games) # optimality of q-table after each gam
 for game in tqdm(range(gameconfig.games)):
     # Reset Board
     i, t, turn, reward_list, done = env.reset()
-    prev_turn = turn
-    player_0.update_state_buffer(i,t,turn)
 
-    
-
-    # Play Game
-    while not done:
-        
+    # Possible Det Move
+    if turn==1:
         # Get Action
         action = players[turn].act(i,t,game)
 
         # Take Action
         i, t, turn, reward_list, done = env.step(action)
 
+    # Record States
+    player_0.update_state_buffer(i,t,turn)
+
+    # Play Game
+    while not done:
+        ##### Turn 0
+        # Get Action
+        action_0 = player_0.act(i,t,game)
+        # Take Action
+        i, t, turn, reward_list, done = env.step(action_0)
+
+        ##### Turn 1
+        if not done:
+            # Get Action
+            action_1 = player_1.act(i,t,game)
+            # Take Action
+            i, t, turn, reward_list, done = env.step(action_1)
+
         # Record States
         player_0.update_state_buffer(i,t,turn)
 
         # Update Experiences
-        if players[prev_turn].trainable:
-            players[prev_turn].update_game_buffer(action, reward_list[turn], done)
+        player_0.update_game_buffer(action_0, reward_list[0], done)
 
         # Update total moves
         move_total+=1
-
-        # Update prev_turn
-        prev_turn = turn
     # Train
     player_0.train(move_total, reward_list)
 
