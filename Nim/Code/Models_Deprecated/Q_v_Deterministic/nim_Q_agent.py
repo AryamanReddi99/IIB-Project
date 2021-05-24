@@ -17,7 +17,6 @@ i=3
 n=20
 skill = 1
 opponent = scalable_player(skill)
-#opponent = random_player()
 env = nim_env_Q(i,n,opponent,first_player="random")
 
 q_table = np.zeros([(env.n)+4, env.action_space_n])

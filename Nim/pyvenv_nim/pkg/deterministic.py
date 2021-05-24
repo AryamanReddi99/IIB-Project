@@ -9,7 +9,9 @@ class ScalablePlayer():
     """
     def __init__(self,skill):
         self.skill = skill
-    def act(self, i, t):
+        self.trainable = False
+
+    def act(self, i, t, game):
         if random.random() <= self.skill:
             return optimal_play(i,t)
         else:
@@ -18,7 +20,7 @@ class ScalablePlayer():
 class KeyboardPlayer():
     def __init__(self):
         pass
-    def act(self,state,opts=None):
+    def act(self,state):
         int_input = int(input(f"Please enter a number between 1 - {i}: "))
         return int_input
 

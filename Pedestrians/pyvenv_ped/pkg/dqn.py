@@ -94,7 +94,7 @@ class CNN():
                 target_pos_data[target] = self._matrixify(pos)
             self.target_pos_buffer.append(target_pos_data)
 
-        # Update inputs 
+        # Update states 
         if len(self.agent_pos_buffer) > 1:
             self._update_state_buffer()
 

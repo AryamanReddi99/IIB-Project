@@ -10,7 +10,7 @@ from pkg.q import *
 from pkg.deterministic import *
 
 # Miscellaneous
-random.seed(0)
+random.seed(3)
 
 # Data Paths
 sep = os.path.sep # system path seperator
@@ -29,7 +29,7 @@ gameconfig = GameConfig(
         i=3,
         n=20,
         games=2000,
-        start_player=2
+        start_player=0
     )
 env = NimEnv(gameconfig)
 
@@ -53,7 +53,8 @@ else:
 # Player Setup
 # Learner Always First by Convention (Q-Learner/DQN)
 player_0 = q
-player_1 = ScalablePlayer(1)
+player_1 = q
+#player_1 = ScalablePlayer(1)
 players = [player_0, player_1]
 
 ### Diagnostics
@@ -67,8 +68,6 @@ for game in tqdm(range(gameconfig.games)):
     i, t, turn, reward_list, done = env.reset()
     prev_turn = turn
     player_0.update_state_buffer(i,t,turn)
-
-    
 
     # Play Game
     while not done:
