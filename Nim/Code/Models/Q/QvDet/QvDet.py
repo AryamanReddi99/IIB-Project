@@ -21,7 +21,7 @@ from pkg.deterministic import *
 
 # Run Script from Colab
 args = sys.argv
-gameconfig, q_config, skill = args
+print(args)
 
 # Data Paths
 sep = os.path.sep # system path seperator
