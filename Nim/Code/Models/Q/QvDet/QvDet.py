@@ -47,11 +47,11 @@ env = NimEnv(gameconfig)
 # Q Setup
 qconfig = QConfig(
         mode = mode,
-        alpha = int(alpha),
-        gamma = int(gamma),
-        frac_random = int(frac_random),
-        final_epsilon = int(final_epsilon),
-        min_epsilon = int(min_epsilon),
+        alpha = float(alpha),
+        gamma = float(gamma),
+        frac_random = float(frac_random),
+        final_epsilon = float(final_epsilon),
+        min_epsilon = float(min_epsilon),
         mem_max_size = int(mem_max_size),
         reward_mode = int(reward_mode)
     )
@@ -66,7 +66,7 @@ else:
 player_0 = q
 
 # Deterministic Opponent
-player_1 = ScalablePlayer(int(skill))
+player_1 = ScalablePlayer(float(skill))
 players = [player_0, player_1]
 
 ### Diagnostics
