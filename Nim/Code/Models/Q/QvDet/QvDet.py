@@ -31,12 +31,12 @@ store_model = False
 load_model = False
 
 # Create Environment
-gameconfig = GameConfig(
-        i=3,
-        n=20,
-        games=2000,
-        start_player=2
-    )
+# gameconfig = GameConfig(
+#         i=3,
+#         n=20,
+#         games=1000,
+#         start_player=2
+#     )
 env = NimEnv(gameconfig)
 
 # Q Setup
