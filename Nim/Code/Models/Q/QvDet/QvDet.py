@@ -37,23 +37,23 @@ load_model = False
 
 # Create Environment
 gameconfig = GameConfig(
-        i=i,
-        n=n,
-        games=games,
-        start_player=start_player
+        i=int(i),
+        n=int(n),
+        games=int(games),
+        start_player=int(start_player)
     )
 env = NimEnv(gameconfig)
 
 # Q Setup
 qconfig = QConfig(
         mode = mode,
-        alpha = alpha,
-        gamma = gamma,
-        frac_random = frac_random,
-        final_epsilon = final_epsilon,
-        min_epsilon = min_epsilon,
-        mem_max_size = mem_max_size,
-        reward_mode = reward_mode
+        alpha = int(alpha),
+        gamma = int(gamma),
+        frac_random = int(frac_random),
+        final_epsilon = int(final_epsilon),
+        min_epsilon = int(min_epsilon),
+        mem_max_size = int(mem_max_size),
+        reward_mode = int(reward_mode)
     )
 q = Q(gameconfig, qconfig)
 if load_model:
@@ -61,13 +61,12 @@ if load_model:
 else:
     q.create_q()
 
-# Player Setup
+### Player Setup
 # Learner Always First by Convention (Q-Learner/DQN)
 player_0 = q
 
 # Deterministic Opponent
-#skill = 1
-player_1 = ScalablePlayer(skill)
+player_1 = ScalablePlayer(int(skill))
 players = [player_0, player_1]
 
 ### Diagnostics
