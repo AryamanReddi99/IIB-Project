@@ -21,7 +21,7 @@ from pkg.deterministic import *
 
 # Run Script from Colab
 args = sys.argv
-script, gameconfig, q_config, skill = args
+i,n,games,start_player,mode,alpha,gamma,frac_random,final_epsilon,min_epsilon,mem_max_size,reward_mode,skill = args
 
 # Data Paths
 sep = os.path.sep # system path seperator
@@ -36,25 +36,25 @@ store_model = False
 load_model = False
 
 # Create Environment
-# gameconfig = GameConfig(
-#         i=3,
-#         n=20,
-#         games=1000,
-#         start_player=2
-#     )
+gameconfig = GameConfig(
+        i=i,
+        n=n,
+        games=games,
+        start_player=start_player
+    )
 env = NimEnv(gameconfig)
 
 # Q Setup
-# qconfig = QConfig(
-#         mode = "training",
-#         alpha = 0.4,
-#         gamma = 0.6,
-#         frac_random = 0.1,
-#         final_epsilon = 0.001,
-#         min_epsilon = 0,
-#         mem_max_size = 1000,
-#         reward_mode = 0
-#     )
+qconfig = QConfig(
+        mode = mode,
+        alpha = alpha,
+        gamma = gamma,
+        frac_random = frac_random,
+        final_epsilon = final_epsilon,
+        min_epsilon = min_epsilon,
+        mem_max_size = mem_max_size,
+        reward_mode = reward_mode
+    )
 q = Q(gameconfig, qconfig)
 if load_model:
     q.load_q(load_q_fn)
