@@ -23,6 +23,8 @@ from pkg.deterministic import *
 args = sys.argv
 script,i,n,games,start_player,mode,alpha,gamma,frac_random,final_epsilon,min_epsilon,mem_max_size,reward_mode,skill = args
 
+# Override Parameters
+
 # Data Paths
 sep = os.path.sep # system path seperator
 os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd

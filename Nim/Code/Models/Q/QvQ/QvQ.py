@@ -13,7 +13,13 @@ from pkg.deterministic import *
 # and used for training.
 
 # Miscellaneous
-random.seed(3)
+#random.seed(3)
+
+# Run Script from Colab
+args = sys.argv
+script,i,n,games,start_player,mode,alpha,gamma,frac_random,final_epsilon,min_epsilon,mem_max_size,reward_mode,skill = args
+
+# Override Parameters
 
 # Data Paths
 sep = os.path.sep # system path seperator
@@ -29,23 +35,23 @@ load_model = False
 
 # Create Environment
 gameconfig = GameConfig(
-        i=3,
-        n=20,
-        games=2000,
-        start_player=0
+        i=int(i),
+        n=int(n),
+        games=int(games),
+        start_player=int(start_player)
     )
 env = NimEnv(gameconfig)
 
 # Q Setup
 qconfig = QConfig(
-        mode = "training",
-        alpha = 0.4,
-        gamma = 0.6,
-        frac_random = 0.1,
-        final_epsilon = 0.001,
-        min_epsilon = 0,
-        mem_max_size = 1000,
-        reward_mode = 2
+        mode = mode,
+        alpha = float(alpha),
+        gamma = float(gamma),
+        frac_random = float(frac_random),
+        final_epsilon = float(final_epsilon),
+        min_epsilon = float(min_epsilon),
+        mem_max_size = int(mem_max_size),
+        reward_mode = int(reward_mode)
     )
 q = Q(gameconfig, qconfig)
 if load_model:
@@ -54,10 +60,8 @@ else:
     q.create_q()
 
 # Player Setup
-# Learner Always First by Convention (Q-Learner/DQN)
 player_0 = q
 player_1 = q
-#player_1 = ScalablePlayer(1)
 players = [player_0, player_1]
 
 ### Diagnostics

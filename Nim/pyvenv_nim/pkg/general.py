@@ -31,7 +31,7 @@ def consecutive(data, stepsize=1):
 
 def table_optimality(i,table):
     """
-    Return the % of the q-table's non-parity states that are correct
+    Return the fraction of the q-table's non-parity states that are correct
     """
     # Only evaluate non-parity states
     evaluatable=0
