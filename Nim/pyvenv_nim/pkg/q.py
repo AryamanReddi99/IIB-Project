@@ -29,7 +29,7 @@ class Q():
 
         ## Buffers
         # stores last 2 sets of model-readable states
-        self.state_buffer = collections.deque(maxlen=2)
+        self.state_buffer = collections.deque(maxlen=3)
         # stores experiences from one game
         self.game_buffer = []
         # stores experiences
@@ -46,13 +46,20 @@ class Q():
         }
         self.state_buffer.append(state)
 
-    def update_game_buffer(self, action, reward, done):
+    def update_game_buffer_2(self, action, reward, done):
         """
-        Add new experience to game buffer
-        Call update_state_buffer first
+        Update game buffer using previous 2 states
         """
         experience = Experience(self.state_buffer[-2], action, reward, self.state_buffer[-1], done)
         self.game_buffer.append(experience) 
+
+    def update_game_buffer_3(self, action, reward, done):
+        """
+        Update game buffer using previous 3 states
+        """
+        if len(self.state_buffer)==3:
+            experience = Experience(self.state_buffer[-3], action, reward, self.state_buffer[-1], done)
+            self.game_buffer.append(experience) 
 
     def act(self, i, t, game):
         # explore
