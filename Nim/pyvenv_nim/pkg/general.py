@@ -52,6 +52,44 @@ def table_magnitude(table):
     """
     return np.sum(np.absolute(table))
 
+def one_hot(n,dim):
+    """
+    Convert integer to a one-hot vector of dimension dim+1
+    """
+    vec = np.zeros(dim + 1)
+    vec[n] = 1
+    return vec
+
+def one_hot_repeat(n, dim):
+    """
+    Convert integer to dim+1/n-hot vector of dimension dim+1 with 1 repeated every n places
+    """
+    n_repeat = 0
+    vec = np.zeros(dim + 1)
+    while n_repeated<=dim:
+        vec[n_repeated]=1
+        n_repeated+=n
+    return vec
+
+def one_hot_repeat_truncate(n, dim, stop):
+    """
+    Convert integer to dim+1/i-hot vector of dimension dim+1 with 1 repeated every n places, truncated up to stop
+    """
+    n_repeat = 0
+    vec = np.zeros(dim + 1)
+    while n_repeat<=stop:
+        vec[n_repeat]=1
+        n_repeat+=n
+    return vec
+
+def one_hot_action(action, dim):
+    """
+    Convert integer to one-hot action of dimension dim
+    """
+    vec = np.zeros(dim)
+    vec[action]=1
+    return vec
+
 # Tuple class which contains details of an experience
 Experience = collections.namedtuple('Experience', field_names=['state', 'action', 'reward', 'new_state', 'done'])
 
@@ -67,6 +105,8 @@ class GameConfig():
         self.i = i
         self.n = n
         self.games = games
+        self.max_i = 10
+        self.max_n = 50
 
         # Start Player
         # Can start with 0, 1, or 2 (random)
