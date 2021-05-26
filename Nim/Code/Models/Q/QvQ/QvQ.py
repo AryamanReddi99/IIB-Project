@@ -12,15 +12,36 @@ from pkg.deterministic import *
 
 # In a game of Q vs Q, each intermediate state must be recorded 
 # and used for training.
+#
+# To run from VSCode: comment out lines for sys args and lines setting
+# configs using sys args
 
 # Miscellaneous
 #random.seed(3)
 
 # Run Script from Colab
-args = sys.argv
-script,i,n,games,start_player,mode,alpha,gamma,frac_random,final_epsilon,min_epsilon,mem_max_size,reward_mode,skill = args
+# args = sys.argv
+# script,i,n,games,start_player,mode,alpha,gamma,frac_random,final_epsilon,min_epsilon,mem_max_size,reward_mode,skill = args
 
 # Override Parameters
+
+# Override Configs
+gameconfig = GameConfig(
+        i=3,
+        n=20,
+        games=1000,
+        start_player=0
+    )
+qconfig = QConfig(
+        mode = "training",
+        alpha = 0.6,
+        gamma = 0.8,
+        frac_random = 0.1,
+        final_epsilon = 0.001,
+        min_epsilon = 0,
+        mem_max_size = 1000,
+        reward_mode = 0
+    )
 
 # Data Paths
 sep = os.path.sep # system path seperator
@@ -34,26 +55,26 @@ store_img = True
 store_model = False
 load_model = False
 
-# Create Environment
-gameconfig = GameConfig(
-        i=int(i),
-        n=int(n),
-        games=int(games),
-        start_player=int(start_player)
-    )
+## Create Environment
+# gameconfig = GameConfig(
+#         i=int(i),
+#         n=int(n),
+#         games=int(games),
+#         start_player=int(start_player)
+#     )
 env = NimEnv(gameconfig)
 
-# Q Setup
-qconfig = QConfig(
-        mode = mode,
-        alpha = float(alpha),
-        gamma = float(gamma),
-        frac_random = float(frac_random),
-        final_epsilon = float(final_epsilon),
-        min_epsilon = float(min_epsilon),
-        mem_max_size = int(mem_max_size),
-        reward_mode = int(reward_mode)
-    )
+## Q Setup
+# qconfig = QConfig(
+#         mode = mode,
+#         alpha = float(alpha),
+#         gamma = float(gamma),
+#         frac_random = float(frac_random),
+#         final_epsilon = float(final_epsilon),
+#         min_epsilon = float(min_epsilon),
+#         mem_max_size = int(mem_max_size),
+#         reward_mode = int(reward_mode)
+#     )
 q = Q(gameconfig, qconfig)
 if load_model:
     q.load_q(load_q_fn)
