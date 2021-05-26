@@ -90,6 +90,7 @@ players = [player_0, player_1]
 move_total = 0
 wins = np.zeros(gameconfig.games) # indices of winners
 optimalities = np.zeros(gameconfig.games) # optimality of q-table after each game
+q_mags = np.zeros(gameconfig.games) # total q-val magnitudes after each game
 
 # Begin Training
 for game in tqdm(range(gameconfig.games)):
@@ -130,6 +131,7 @@ for game in tqdm(range(gameconfig.games)):
     ### Diagnostics
     wins[game] = turn
     optimalities[game] = table_optimality(gameconfig.i,q.table)
+    q_mags[game] = table_magnitude(q.table)
 
 # Plotting
 #cum_avg_plot = cum_avg(wins)
