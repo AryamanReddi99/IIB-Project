@@ -111,7 +111,7 @@ for game in tqdm(range(gameconfig.games)):
         player_0.update_state_buffer(i,t,turn)
 
         # Update Experiences
-        player_0.update_game_buffer(action_0, reward_list[0], done)
+        player_0.update_game_buffer_2(action_0, reward_list[0], done)
 
         # Update total moves
         move_total+=1
