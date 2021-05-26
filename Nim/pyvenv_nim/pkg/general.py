@@ -50,7 +50,7 @@ def table_magnitude(table):
     """
     Return the total abs magnitude of the q-values of a table
     """
-    return np.sum(np.absolute(q.table))
+    return np.sum(np.absolute(table))
 
 # Tuple class which contains details of an experience
 Experience = collections.namedtuple('Experience', field_names=['state', 'action', 'reward', 'new_state', 'done'])
