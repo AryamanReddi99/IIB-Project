@@ -20,8 +20,8 @@ from pkg.deterministic import *
 #random.seed(3)
 
 # Run Script from Colab
-args = sys.argv
-script,i,n,games,start_player,mode,alpha,gamma,frac_random,final_epsilon,min_epsilon,mem_max_size,reward_mode,skill = args
+# args = sys.argv
+# script,i,n,games,start_player,mode,alpha,gamma,frac_random,final_epsilon,min_epsilon,mem_max_size,reward_mode,skill = args
 
 # Override Parameters
 
@@ -29,18 +29,18 @@ script,i,n,games,start_player,mode,alpha,gamma,frac_random,final_epsilon,min_eps
 gameconfig = GameConfig(
         i=3,
         n=20,
-        games=1000,
+        games=2000,
         start_player=0
     )
 qconfig = QConfig(
         mode = "training",
         alpha = 0.6,
-        gamma = 0.8,
+        gamma = 0.1,
         frac_random = 0.1,
         final_epsilon = 0.001,
         min_epsilon = 0,
         mem_max_size = 1000,
-        reward_mode = 0
+        reward_mode = 2
     )
 
 # Data Paths
@@ -56,25 +56,25 @@ store_model = False
 load_model = False
 
 ## Create Environment
-gameconfig = GameConfig(
-        i=int(i),
-        n=int(n),
-        games=int(games),
-        start_player=int(start_player)
-    )
+# gameconfig = GameConfig(
+#         i=int(i),
+#         n=int(n),
+#         games=int(games),
+#         start_player=int(start_player)
+#     )
 env = NimEnv(gameconfig)
 
 ## Q Setup
-qconfig = QConfig(
-        mode = mode,
-        alpha = float(alpha),
-        gamma = float(gamma),
-        frac_random = float(frac_random),
-        final_epsilon = float(final_epsilon),
-        min_epsilon = float(min_epsilon),
-        mem_max_size = int(mem_max_size),
-        reward_mode = int(reward_mode)
-    )
+# qconfig = QConfig(
+#         mode = mode,
+#         alpha = float(alpha),
+#         gamma = float(gamma),
+#         frac_random = float(frac_random),
+#         final_epsilon = float(final_epsilon),
+#         min_epsilon = float(min_epsilon),
+#         mem_max_size = int(mem_max_size),
+#         reward_mode = int(reward_mode)
+#     )
 q = Q(gameconfig, qconfig)
 if load_model:
     q.load_q(load_q_fn)
@@ -96,7 +96,7 @@ for game in tqdm(range(gameconfig.games)):
     # Reset Board
     i, t, turn, reward_list, done = env.reset()
     prev_turn = turn
-    player_0.update_state_buffer(i,t,turn)
+    q.update_state_buffer(i,t,turn)
 
     # Play Game
     while not done:
@@ -119,11 +119,11 @@ for game in tqdm(range(gameconfig.games)):
         # Update prev_turn
         prev_turn = turn
     # Train
-    player_0.train(move_total, reward_list)
+    q.train(move_total, reward_list)
 
     ### Diagnostics
     wins[game] = turn
-    optimalities[game] = table_optimality(gameconfig.i,player_0.table)
+    optimalities[game] = table_optimality(gameconfig.i,q.table)
 
 # Plotting
 #cum_avg_plot = cum_avg(wins)
