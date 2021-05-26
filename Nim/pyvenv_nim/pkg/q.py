@@ -71,6 +71,8 @@ class Q():
     def train(self, move_total, reward_list):
         # Testing mode
         if self.mode == "testing":
+            self.state_buffer.clear()
+            self.game_buffer = []
             return
             
         # Update game buffer
@@ -86,7 +88,8 @@ class Q():
                 q_new = q_old + self.alpha * (exp.reward - q_old)
             self.table[exp.state["t"]][exp.action-1] = q_new
         
-        # Reset game buffer
+        # Reset buffers
+        self.state_buffer.clear()
         self.game_buffer = []
 
     def _update_game_buffer(self, reward_list):

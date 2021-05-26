@@ -20,8 +20,8 @@ from pkg.deterministic import *
 #random.seed(3)
 
 # Run Script from Colab
-# args = sys.argv
-# script,i,n,games,start_player,mode,alpha,gamma,frac_random,final_epsilon,min_epsilon,mem_max_size,reward_mode,skill = args
+args = sys.argv
+script,i,n,games,start_player,mode,alpha,gamma,frac_random,final_epsilon,min_epsilon,mem_max_size,reward_mode,skill = args
 
 # Override Parameters
 
@@ -56,25 +56,25 @@ store_model = False
 load_model = False
 
 ## Create Environment
-# gameconfig = GameConfig(
-#         i=int(i),
-#         n=int(n),
-#         games=int(games),
-#         start_player=int(start_player)
-#     )
+gameconfig = GameConfig(
+        i=int(i),
+        n=int(n),
+        games=int(games),
+        start_player=int(start_player)
+    )
 env = NimEnv(gameconfig)
 
 ## Q Setup
-# qconfig = QConfig(
-#         mode = mode,
-#         alpha = float(alpha),
-#         gamma = float(gamma),
-#         frac_random = float(frac_random),
-#         final_epsilon = float(final_epsilon),
-#         min_epsilon = float(min_epsilon),
-#         mem_max_size = int(mem_max_size),
-#         reward_mode = int(reward_mode)
-#     )
+qconfig = QConfig(
+        mode = mode,
+        alpha = float(alpha),
+        gamma = float(gamma),
+        frac_random = float(frac_random),
+        final_epsilon = float(final_epsilon),
+        min_epsilon = float(min_epsilon),
+        mem_max_size = int(mem_max_size),
+        reward_mode = int(reward_mode)
+    )
 q = Q(gameconfig, qconfig)
 if load_model:
     q.load_q(load_q_fn)
@@ -108,11 +108,10 @@ for game in tqdm(range(gameconfig.games)):
         i, t, turn, reward_list, done = env.step(action)
 
         # Record States
-        player_0.update_state_buffer(i,t,turn)
+        q.update_state_buffer(i,t,turn)
 
         # Update Experiences
-        if players[prev_turn].trainable:
-            players[prev_turn].update_game_buffer(action, reward_list[turn], done)
+        q.update_game_buffer(action, reward_list[turn], done)
 
         # Update total moves
         move_total+=1
