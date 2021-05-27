@@ -306,7 +306,7 @@ class CNN():
         """"
         Gets the Q-value predictions of the network for a certain value of i for dividends upto i
         """
-        table = np.zeros([self.i+1,self.max_i])
+        table = np.zeros([i+1,self.max_i])
         for t, row in enumerate(table):
             readable_state = self._readable_state_single(self._readable_state(i,t))
             qvals = self.model.predict(readable_state)
