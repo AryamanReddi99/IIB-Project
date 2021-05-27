@@ -21,8 +21,8 @@ from pkg.deterministic import *
 random.seed(0)
 
 # Run Script from Colab
-# args = sys.argv
-# script,i,n,games,start_player,mode,alpha,gamma,frac_random,final_epsilon,min_epsilon,mem_max_size,reward_mode,skill = args
+args = sys.argv
+script,i,n,games,max_i,max_n,start_player,mode,gamma,mem_max_size,minibatch_size,epoch_size,num_filters,kernel_regulariser,kernel_activation,truncate_i,frac_random,final_epsilon,min_epsilon,learning_rate,tensorboard,epochs,target_model_iter,reward_mode,optimal_override,test_divisors = args
 
 # Override Parameters
 
@@ -71,14 +71,40 @@ store_model = False
 load_model = False
 
 ## Create Environment
-# gameconfig = GameConfig(
-#         i=int(i),
-#         n=int(n),
-#         games=int(games),
-#         start_player=int(start_player)
-#     )
+gameconfig = GameConfig(
+        i=int(i),
+        n=int(n),
+        games=int(games),
+        max_i = int(max_i),
+        max_n = int(max_n),
+        start_player=int(start_player)
+    )
 
 env = NimEnv(gameconfig)
+
+## Create CNN
+
+nn_config = NNConfig(
+        mode = mode,
+        gamma = float(gamma),
+        mem_max_size = int(mem_max_size),
+        minibatch_size = int(minibatch_size),
+        epoch_size = int(epoch_size),
+        num_filters = int(num_filters),
+        kernel_regulariser = float(kernel_regulariser),
+        kernel_activation = kernel_activation,
+        truncate_i = int(truncate_i),
+        frac_random = float(frac_random),
+        final_epsilon = float(final_epsilon),
+        min_epsilon = float(min_epsilon),
+        learning_rate = float(learning_rate),
+        tensorboard = int(tensorboard),
+        epochs = int(epochs),
+        target_model_iter = int(target_model_iter),
+        reward_mode = int(reward_mode),
+        optimal_override = int(optimal_override),
+        test_divisors = [gameconfig.i]
+)
 
 cnn = CNN(gameconfig, nn_config)
 if load_model:
