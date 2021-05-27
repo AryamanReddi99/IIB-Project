@@ -310,7 +310,7 @@ class CNN():
         for t, row in enumerate(table):
             readable_state = self._readable_state_single(self._readable_state(i,t))
             qvals = self.model.predict(readable_state)
-            row=qvals
+            table[t]=qvals
         return table_optimality(i, table)
 
 
