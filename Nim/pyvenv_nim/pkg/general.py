@@ -66,9 +66,9 @@ def one_hot_repeat(n, dim):
     """
     n_repeat = 0
     vec = np.zeros(dim + 1)
-    while n_repeated<=dim:
-        vec[n_repeated]=1
-        n_repeated+=n
+    while n_repeat<=dim:
+        vec[n_repeat]=1
+        n_repeat+=n
     return vec
 
 def one_hot_repeat_truncate(n, dim, stop):
@@ -98,6 +98,8 @@ class GameConfig():
                 i=3,
                 n=20,
                 games = 1000,
+                max_i = 6,
+                max_n = 50,
                 start_player = 0
                 ):
         
@@ -105,8 +107,8 @@ class GameConfig():
         self.i = i
         self.n = n
         self.games = games
-        self.max_i = 10
-        self.max_n = 50
+        self.max_i = max_i
+        self.max_n = max_n
 
         # Start Player
         # Can start with 0, 1, or 2 (random)

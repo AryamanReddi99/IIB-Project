@@ -1,4 +1,5 @@
 import collections
+import datetime
 import numpy as np
 import tensorflow as tf
 from keras import regularizers
@@ -37,8 +38,9 @@ class CNN():
         self.minibatch_size = nn_config.minibatch_size
         self.epoch_size = nn_config.epoch_size
         self.num_filters = nn_config.num_filters
-        self.kernel_regulariser = kernel_regulariser
-        self.kernel_activation = kernel_activation
+        self.kernel_regulariser = nn_config.kernel_regulariser
+        self.kernel_activation = nn_config.kernel_activation
+        self.truncate_i = nn_config.truncate_i
         self.frac_random = nn_config.frac_random
         self.final_epsilon = nn_config.final_epsilon
         self.min_epsilon = nn_config.min_epsilon
@@ -46,6 +48,9 @@ class CNN():
         self.tensorboard = nn_config.tensorboard
         self.epochs = nn_config.epochs
         self.target_model_iter = nn_config.target_model_iter
+        self.reward_mode = nn_config.reward_mode
+        self.optimal_override = nn_config.optimal_override
+        self.test_divisors = nn_config.test_divisors
 
         # Modulo i+1
         self.max_i_mod = self.max_i + 1
@@ -111,15 +116,16 @@ class CNN():
         state = self.state_buffer[-1]
         i = state["i"]
         t = state["t"]
+        # override
+        if self.optimal_override:
+            action = optimal_play(i,t)
         # explore
-        if random.uniform(0,1) < self._get_epsilon(game):
+        elif random.uniform(0,1) < self._get_epsilon(game):
             action = self._action_space_sample(i,t)
         # exploit
         else:
             # make machine-readable state
-            readable_state = self._readable_state(i,t)
-            qvals = self.model.predict(readable_state)
-            action = np.argmax(qvals) + 1
+            action = self._predict(i, t)
         return action
 
     def update_experiences(self, reward_list):
@@ -138,6 +144,22 @@ class CNN():
         self.replay_sample = self._get_replay_sample()
         self._experience_replay()
 
+    def total_optimality(self):
+        """
+        Returns mean optmality of network for all test divisors
+        """
+        divisor_optimalities = list(map(lambda x : self._i_table_optimality(x), self.test_divisors))
+        return np.mean(divisor_optimalities)
+
+    def _predict(self, i, t):
+        """
+        Model's chosen action for a given i,t
+        """
+        readable_state = self._readable_state_single(self._readable_state(i,t))
+        qvals = self.model.predict(readable_state)
+        action = np.argmax(qvals) + 1
+        return action
+
     def _experience_replay(self):
         """
         Trains a model on q(s,a) of sampled experiences
@@ -147,8 +169,8 @@ class CNN():
         states, actions, rewards, new_states, dones = self.replay_sample
 
         # Reshape states and new states into batches
-        states_readable_batch = np.array(map(lambda state: self._readable_state(state["i"], state["t"]), states))
-        new_states_readable_batch = np.array(map(lambda state: self._readable_state(state["i"], state["t"]), states))
+        states_readable_batch = np.array(list(map(lambda state: self._readable_state(state["i"], state["t"]), states)))
+        new_states_readable_batch = np.array(list(map(lambda state: self._readable_state(state["i"], state["t"]), states)))
 
         # Predicted state q values
         target_qvals = self.model.predict(states_readable_batch)
@@ -162,7 +184,7 @@ class CNN():
                 target_qval = reward
             else:
                 target_qval = reward + self.gamma * np.max(new_state_qvals)
-            target_qvals[i][action] = target_qval
+            target_qvals[i][action-1] = target_qval
         self._cnn_fit(states_readable_batch, target_qvals, self.epochs)
 
     def _cnn_fit(self,x,y,epochs):
@@ -205,12 +227,12 @@ class CNN():
 
         model.add(GlobalMaxPooling1D(name="maxpool"))
 
-        model.add(Dense(max_i, name="output", activation='linear'))
+        model.add(Dense(self.max_i, name="output", activation='linear'))
 
         model.compile(
                     loss='mean_squared_error',
                     optimizer=Adam(learning_rate=self.learning_rate),
-                    metrics=['loss','accuracy'])
+                    metrics=['accuracy'])
   
         return model
 
@@ -247,10 +269,21 @@ class CNN():
         """
         i_mod = i + 1
         t_vec = one_hot(t, self.max_n)
-        i_mode_vec = one_hot_repeat(i_mod, self.max_n)
-        stacked = np.vstack((np.flip(t_vec),np.flip(i_vec))).T
+        if self.truncate_i:
+            i_mod_vec = one_hot_repeat_truncate(i_mod, self.max_n)
+        else:
+            i_mod_vec = one_hot_repeat(i_mod, self.max_n)
+        stacked = np.vstack((np.flip(t_vec),np.flip(i_mod_vec))).T
         stacked_padded = np.pad(stacked, pad_width=((self.max_i_mod-1,self.max_i_mod-1),(0,0)))
         return stacked_padded
+
+    def _readable_state_single(self, state):
+        """
+        Adds an extra dimenion to a single readable state
+        """
+        state_shape = state.shape
+        single_state = state.reshape(1, *state_shape)
+        return single_state
 
     def _update_game_buffer(self, reward_list):
         # Final
@@ -269,6 +302,18 @@ class CNN():
             self.game_buffer = list(map(lambda x: x._replace(reward=reward_list[x.state["turn"]]),self.game_buffer))
             return self.game_buffer
 
+    def _i_table_optimality(self,i):
+        """"
+        Gets the Q-value predictions of the network for a certain value of i for dividends upto i_mod
+        """
+        table = np.zeros([self.i,self.max_i])
+        for t, row in enumerate(table):
+            readable_state = self._readable_state_single(self._readable_state(i,t))
+            qvals = self.model.predict(readable_state)
+            row=qvals
+        return table_optimality(i, table)
+
+
 class NNConfig():
     """
     mode:
@@ -284,7 +329,7 @@ class NNConfig():
                 num_filters = 10,
                 kernel_regulariser = 0.01,
                 kernel_activation = 'relu',
-                truncate_input = False,
+                truncate_i = False,
                 frac_random = 0.1,
                 final_epsilon = 0.01,
                 min_epsilon = 0.01,
@@ -293,32 +338,34 @@ class NNConfig():
                 epochs = 1,
                 target_model_iter = 10,
                 reward_mode = 0,
-                optimal_override = 0
+                optimal_override = 0,
+                test_divisors = 3
                 ):
-            self.mode = mode
-            self.gamma = gamma
-            self.mem_max_size = mem_max_size
-            self.minibatch_size = minibatch_size
-            self.epoch_size = epoch_size
-            self.num_filters = num_filters
-            self.kernel_regulariser = kernel_regulariser
-            self.kernel_activation = kernel_activation 
-            self.truncate_input = truncate_input
-            self.frac_random = frac_random
-            self.final_epsilon = final_epsilon
-            self.min_epsilon = min_epsilon
-            self.learning_rate = learning_rate
-            self.tensorboard = tensorboard
-            self.epochs = epochs
-            self.target_model_iter = target_model_iter
+        self.mode = mode
+        self.gamma = gamma
+        self.mem_max_size = mem_max_size
+        self.minibatch_size = minibatch_size
+        self.epoch_size = epoch_size
+        self.num_filters = num_filters
+        self.kernel_regulariser = kernel_regulariser
+        self.kernel_activation = kernel_activation 
+        self.truncate_i = truncate_i
+        self.frac_random = frac_random
+        self.final_epsilon = final_epsilon
+        self.min_epsilon = min_epsilon
+        self.learning_rate = learning_rate
+        self.tensorboard = tensorboard
+        self.epochs = epochs
+        self.target_model_iter = target_model_iter
+        self.test_divisors = test_divisors
 
-            # Reward_mode:
-            # 0: Final - only the rewards given by env
-            # 1: Sparse - terminal move of either agent
-            # 2: Full - terminal rewards propagate through whole game
-            self.reward_mode = reward_mode
+        # Reward_mode:
+        # 0: Final - only the rewards given by env
+        # 1: Sparse - terminal move of either agent
+        # 2: Full - terminal rewards propagate through whole game
+        self.reward_mode = reward_mode
 
-            # Optimal Override
-            # Switch on to force optimal play - use with caution,
-            # Only for testing
-            self.optimal_override = optimal_override
+        # Optimal Override
+        # Switch on to force optimal play - use with caution,
+        # Only for testing
+        self.optimal_override = optimal_override
