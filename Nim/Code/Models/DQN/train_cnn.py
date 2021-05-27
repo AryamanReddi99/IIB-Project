@@ -23,7 +23,8 @@ random.seed(0)
 # Run Script from Colab
 args = sys.argv
 script,i,n,games,max_i,max_n,start_player,mode,gamma,mem_max_size,minibatch_size,epoch_size,num_filters,kernel_regulariser,kernel_activation,truncate_i,frac_random,final_epsilon,min_epsilon,learning_rate,tensorboard,epochs,target_model_iter,reward_mode,optimal_override,test_divisors = args
-
+print(i)
+print(type(i))
 # Override Parameters
 
 # Manual Configs
@@ -55,7 +56,7 @@ nn_config = NNConfig(
         reward_mode = 0,
         optimal_override = 0,
         test_divisors = [3]
-)
+        )
 
 
 # Data Paths
