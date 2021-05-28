@@ -1,3 +1,8 @@
+# Path
+import sys
+sys.path.append('c:\\Users\\Red\\Google_Drive\\IIB_Project\\Pedestrians\\pyvenv_ped')
+
+# Imports
 import os
 import time
 import numpy as np
@@ -68,8 +73,8 @@ def main():
 
         # Display Data
         display_info = DisplayInfo(
-            agent_pos = [pos2pygame(agent_1, gameconfig.env_size), pos2pygame(agent_2, gameconfig.env_size)],
-            target_pos = [pos2pygame(target_1, gameconfig.env_size), pos2pygame(target_2, gameconfig.env_size)],
+            agent_pos = [float2pygame(agent_1, gameconfig.env_size), float2pygame(agent_2, gameconfig.env_size)],
+            target_pos = [float2pygame(target_1, gameconfig.env_size), float2pygame(target_2, gameconfig.env_size)],
             action_list = [0, 0],
             reward_list = reward_list,
             done_list = done_list,

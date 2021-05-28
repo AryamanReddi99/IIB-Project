@@ -1,3 +1,8 @@
+# Path
+import sys
+sys.path.append('c:\\Users\\Red\\Google_Drive\\IIB_Project\\Pedestrians\\pyvenv_ped')
+
+# Imports
 import os
 import time
 import pprint
@@ -23,16 +28,16 @@ load_model_fn = "..\\Saved\\train_cnn-11-03-21_19-58\\Model".replace("\\","/")
 
 # Storage Triggers
 store_img = True
-store_model = True
+store_model = False
 load_model = False
 
 # Create Environment
 gameconfig = GameConfig(
-    env_size=64,
+    env_size=256,
     config=12,
     speed=10,
     num_agents=2,
-    agent_size=8,
+    agent_size=32,
     channels=4,
     num_actions=5,
     games=100,
@@ -41,7 +46,7 @@ env = PedEnv(gameconfig)
 
 # Create Display
 screenconfig = ScreenConfig(
-    headless = True,
+    headless = False,
     border_size=10)
 window = Window(screenconfig, gameconfig)
 
