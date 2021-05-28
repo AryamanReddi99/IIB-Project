@@ -70,6 +70,7 @@ class CNN():
         # Metrics
         self.accuracy = []
         self.loss = []
+        self.test_divisors = [i for i in range(2,self.max_i+1)]
 
     def save_cnn(self, path):
         self.model.save(path)

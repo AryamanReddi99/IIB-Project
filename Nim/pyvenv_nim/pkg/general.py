@@ -82,6 +82,18 @@ def one_hot_repeat_truncate(n, dim, stop):
         n_repeat+=n
     return vec
 
+def one_hot_repeat_truncate_head(n, dim, stop):
+    """
+    Convert integer to dim+1/i-hot vector of dimension dim+1 with 1 repeated every n places, truncated up to stop, all but final value trimmed
+    """
+    n_repeat = 0
+    vec = np.zeros(dim + 1)
+    while n_repeat<=stop:
+        if stop - n_repeat < n:
+            vec[n_repeat]=1
+        n_repeat+=n
+    return vec
+
 def one_hot_action(action, dim):
     """
     Convert integer to one-hot action of dimension dim
