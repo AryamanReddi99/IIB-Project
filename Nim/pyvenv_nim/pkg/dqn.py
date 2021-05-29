@@ -230,7 +230,7 @@ class CNN():
 
         model.add(GlobalMaxPooling1D(name="maxpool"))
 
-        model.add(Dense(self.max_i, name="output", activation='linear'))
+        model.add(Dense(self.max_i, name="output", activation='linear',kernel_regularizer=regularizers.L1(0.01)))
 
         model.compile(
                     loss='mean_squared_error',
