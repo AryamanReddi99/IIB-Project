@@ -3,9 +3,11 @@ import datetime
 import numpy as np
 import tensorflow as tf
 from keras import regularizers
+from keras import backend as K
 from keras.optimizers import Adam
+from keras.utils.generic_utils import get_custom_objects
 from keras.models import Sequential, load_model
-from keras.layers import Dense, Dropout, Flatten, Conv1D, MaxPooling1D, GlobalMaxPooling1D
+from keras.layers import Dense, Dropout, Flatten, Conv1D, MaxPooling1D, GlobalMaxPooling1D, Activation
 from tensorflow.keras.callbacks import TensorBoard
 from .general import *
 
@@ -372,3 +374,8 @@ class NNConfig():
         # Switch on to force optimal play - use with caution,
         # Only for testing
         self.optimal_override = optimal_override
+
+def spike(x):
+    return 10**x
+
+get_custom_objects().update({'spike': Activation(spike)})
