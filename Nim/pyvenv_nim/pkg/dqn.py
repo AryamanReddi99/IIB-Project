@@ -318,7 +318,6 @@ class CNN():
             table[t]=qvals
         return table_optimality(i, table)
 
-
 class NNConfig():
     """
     mode:
@@ -376,6 +375,6 @@ class NNConfig():
         self.optimal_override = optimal_override
 
 def spike(x):
-    return 10**x
+    return 100**x
 
 get_custom_objects().update({'spike': Activation(spike)})
