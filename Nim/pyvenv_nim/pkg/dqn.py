@@ -375,6 +375,6 @@ class NNConfig():
         self.optimal_override = optimal_override
 
 def spike(x):
-    return 100**x
+    return 10**x
 
 get_custom_objects().update({'spike': Activation(spike)})
