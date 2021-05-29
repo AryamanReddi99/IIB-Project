@@ -1,3 +1,8 @@
+# Path
+import sys
+sys.path.append('c:\\Users\\Red\\Google_Drive\\IIB_Project\\Pedestrians\\pyvenv_ped')
+
+# Imports
 import os
 import time
 import numpy as np
@@ -20,7 +25,14 @@ load_model = True
 sep = os.path.sep # system path seperator
 os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
 fn = Path(__file__).stem # this filename
-load_model_fn = "..\\Saved\\Perpendicular\\train_cnn-11-03-21_19-58\\Model".replace("\\","/")
+load_model_fn = "..\\Saved\\Parallel\\train_cnn-11-03-21_17-31\\Model".replace("\\","/")
+
+# Good Examples
+# Best parallel crossing:
+#..\\Saved\\Parallel\\train_cnn-11-03-21_17-31\\Model
+# Good perp crossing:
+#..\\Saved\\Perpendicular\\train_cnn-11-03-21_19-58\\Model
+
 
 # Create Environment
 gameconfig = GameConfig(

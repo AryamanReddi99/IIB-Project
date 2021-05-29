@@ -164,8 +164,9 @@ class _PosConfig():
 
     10-19: wall targets
     10 - random (tba)
-    11 - crossing parallel pathways
+    11 - crossing parallel pathways (horizontal)
     12 - crossing perpendicular pathways
+    13 - crossing parallel pathways (vertical)
     """
 
     def __init__(self, size):
@@ -175,7 +176,8 @@ class _PosConfig():
             1:  self.config_1(), 
             2:  self.config_2(), 
             11: self.config_11(),
-            12: self.config_12()}
+            12: self.config_12(),
+            13: self.config_13()}
 
     def config_0(self):
         """
@@ -236,7 +238,7 @@ class _PosConfig():
 
     def config_11(self):
         """
-        crossing parallel pathways, 2 agents
+        crossing horizontal parallel pathways, 2 agents
         """
         x = self.size / 2
         y = self.size / 2
@@ -258,6 +260,20 @@ class _PosConfig():
         agent_2 = np.array([x, self.size - 2])
         target_1 = create_wall("right", self.size)
         target_2 = create_wall("bottom", self.size)
+        return {
+            "agents": [agent_1, agent_2],
+            "targets": [target_1, target_2]}
+        
+    def config_13(self):
+        """
+        crossing vertical parallel pathways, 2 agents
+        """
+        x = self.size / 2
+        y = self.size / 2
+        agent_1 = np.array([x, self.size - 2])
+        agent_2 = np.array([x, 2])
+        target_1 = create_wall("bottom", self.size)
+        target_2 = create_wall("top", self.size)
         return {
             "agents": [agent_1, agent_2],
             "targets": [target_1, target_2]}

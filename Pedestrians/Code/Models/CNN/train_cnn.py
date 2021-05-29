@@ -19,50 +19,77 @@ from pkg.window import *
 # Miscellaneous
 pp = pprint.PrettyPrinter(indent=4)
 
+# Run Script from Colab
+args = sys.argv
+script,env_size,config,speed,num_agents,agent_size,channels,num_actions,games,doom,mode,gamma,mem_max_size,minibatch_size,epoch_size,frac_random,final_epsilon,min_epsilon,learning_rate,tensorboard,target_model_iter = args
+
+# Override Parameters
+# gameconfig = GameConfig(
+#     env_size=64,
+#     config=11,
+#     speed=10,
+#     num_agents=2,
+#     agent_size=8,
+#     channels=4,
+#     num_actions=5,
+#     games=100,
+#     doom=False)
+
+# nn_config = NNConfig(
+#     mode="training",
+#     gamma=0.6,
+#     mem_max_size=1000,
+#     minibatch_size=32,
+#     epoch_size=64,
+#     frac_random=0.1,
+#     final_epsilon=0.01,
+#     min_epsilon=0.01,
+#     learning_rate = 0.001,
+#     tensorboard = False,
+#     target_model_iter = 10)
+
 # Data Paths
 sep = os.path.sep # system path seperator
 os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
 fn = Path(__file__).stem # this filename
 store_model_fn = f"..{sep}Saved{sep}" + fn + datetime.datetime.now().strftime("-%d-%m-%y_%H-%M") + f"{sep}Model"
-load_model_fn = "..\\Saved\\train_cnn-11-03-21_19-58\\Model".replace("\\","/")
 
 # Storage Triggers
 store_img = True
-store_model = False
+store_model = True
 load_model = False
 
 # Create Environment
 gameconfig = GameConfig(
-    env_size=256,
-    config=12,
-    speed=10,
-    num_agents=2,
-    agent_size=32,
-    channels=4,
-    num_actions=5,
-    games=100,
-    doom=False)
+    env_size=env_size,
+    config=config,
+    speed=speed,
+    num_agents=num_agents,
+    agent_size=agent_size,
+    channels=channels,
+    num_actions=num_actions,
+    games=games,
+    doom=doom)
 env = PedEnv(gameconfig)
 
 # Create Display
 screenconfig = ScreenConfig(
-    headless = False,
+    headless = True,
     border_size=10)
 window = Window(screenconfig, gameconfig)
 
-# CNN Setup
 nn_config = NNConfig(
-    mode="training",
-    gamma=0.6,
-    mem_max_size=1000,
-    minibatch_size=32,
-    epoch_size=64,
-    frac_random=0.1,
-    final_epsilon=0.01,
-    min_epsilon=0.01,
-    learning_rate = 0.001,
-    tensorboard = True,
-    target_model_iter = 10)
+    mode=mode,
+    gamma=gamma,
+    mem_max_size=mem_max_size,
+    minibatch_size=minibatch_size,
+    epoch_size=epoch_size,
+    frac_random=frac_random,
+    final_epsilon=final_epsilon,
+    min_epsilon=min_epsilon,
+    learning_rate = learning_rate,
+    tensorboard = tensorboard,
+    target_model_iter = target_model_iter)
 cnn = CNN(gameconfig,nn_config)
 if load_model:
     cnn.load_cnn(load_model_fn)
