@@ -270,8 +270,10 @@ class CNN():
         """
         i_mod = i + 1
         t_vec = one_hot(t, self.max_n)
-        if self.truncate_i:
+        if self.truncate_i==1:
             i_mod_vec = one_hot_repeat_truncate(i_mod, self.max_n, t)
+        elif self.truncate_i==2:
+            i_mod_vec = one_hot_repeat_truncate_head(i_mod, self.max_n, t)
         else:
             i_mod_vec = one_hot_repeat(i_mod, self.max_n)
         stacked = np.vstack((np.flip(t_vec),np.flip(i_mod_vec))).T
