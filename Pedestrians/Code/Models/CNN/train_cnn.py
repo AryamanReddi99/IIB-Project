@@ -61,7 +61,7 @@ load_model = False
 
 # Define Configs
 screenconfig = ScreenConfig(
-    headless = False,
+    headless = True,
     border_size=10)
 gameconfig = GameConfig(
     env_size=int(env_size),
