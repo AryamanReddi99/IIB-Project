@@ -36,7 +36,7 @@ script,env_size,config,speed,num_agents,agent_size,channels,num_actions,games,do
 #     doom=False)
 
 # nn_config = NNConfig(
-#     mode="training",
+#     mode="testing",
 #     gamma=0.6,
 #     mem_max_size=1000,
 #     minibatch_size=32,
@@ -55,11 +55,14 @@ fn = Path(__file__).stem # this filename
 store_model_fn = f"..{sep}Saved{sep}" + fn + datetime.datetime.now().strftime("-%d-%m-%y_%H-%M") + f"{sep}Model"
 
 # Storage Triggers
-store_img = True
+store_img = False
 store_model = True
 load_model = False
 
-# Create Environment
+# Define Configs
+screenconfig = ScreenConfig(
+    headless = False,
+    border_size=10)
 gameconfig = GameConfig(
     env_size=env_size,
     config=config,
@@ -70,14 +73,6 @@ gameconfig = GameConfig(
     num_actions=num_actions,
     games=games,
     doom=doom)
-env = PedEnv(gameconfig)
-
-# Create Display
-screenconfig = ScreenConfig(
-    headless = True,
-    border_size=10)
-window = Window(screenconfig, gameconfig)
-
 nn_config = NNConfig(
     mode=mode,
     gamma=gamma,
@@ -90,7 +85,13 @@ nn_config = NNConfig(
     learning_rate = learning_rate,
     tensorboard = tensorboard,
     target_model_iter = target_model_iter)
+
+# Create Functional Classes
+window = Window(screenconfig, gameconfig)
+env = PedEnv(gameconfig)
 cnn = CNN(gameconfig,nn_config)
+
+# Get Model
 if load_model:
     cnn.load_cnn(load_model_fn)
 else:
@@ -100,7 +101,7 @@ else:
 max_game_length = 50
 
 ### Diagnostics
-total_rewards = []
+rewards = [[] for i in range(gameconfig.num_agents)]
 move_total = 0
 
 # Begin Training
@@ -126,8 +127,8 @@ for game in tqdm(range(gameconfig.games)):
         move = 0)
     window.display(display_info=display_info) # display info on pygame screen
 
-    ### Diagnostics
-    total_reward = 0
+    # Diagnostics
+    game_rewards = [[] for i in range(gameconfig.num_agents)] # rewards for agents
 
     # Play Game
     for move in range(0, max_game_length):
@@ -174,25 +175,26 @@ for game in tqdm(range(gameconfig.games)):
             if stop_list[agent]:
                 # Don't record rewards after agent is done
                 continue
-            total_reward += reward_list[agent]
+            game_rewards[agent].append(reward_list[agent])
 
         # Stop list is done list lagged by 1
         stop_list = np.copy(done_list)
         if done or move==max_game_length-1:
-            total_rewards.append(round(total_reward, 2))
             if not screenconfig.headless:
                 time.sleep(0.2)
             break
 
         # Update total moves
         move_total+=1
+
+    # Diagnostics
+    for agent in range(gameconfig.num_agents):
+        rewards[agent].append(game_rewards[agent])
+
 # Store Model
 if store_model:
     cnn.model.save(store_model_fn)
     print(f"Model saved at {store_model_fn}")
-
-### Diagnostics
-
 
 print("Finished")
 
