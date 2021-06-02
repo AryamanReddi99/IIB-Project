@@ -42,6 +42,7 @@ def mat2float(arr):
     flipped_indices = np.flip(indices, axis=1) # flip x and y coords
     if len(flipped_indices) > 1:
         # wall
+        flipped_indices[:,1]=env_size -1 - flipped_indices[:,1] # flip y about centre
         return flipped_indices
     elif len(flipped_indices) == 1:
         # point
@@ -167,6 +168,9 @@ class _PosConfig():
     11 - crossing parallel pathways (horizontal)
     12 - crossing perpendicular pathways
     13 - crossing parallel pathways (vertical)
+
+    3-player:
+    100 - left, right, top
     """
 
     def __init__(self, size):
@@ -177,7 +181,8 @@ class _PosConfig():
             2:  self.config_2(), 
             11: self.config_11(),
             12: self.config_12(),
-            13: self.config_13()}
+            13: self.config_13(),
+            100: self.config_100()}
 
     def config_0(self):
         """
@@ -263,10 +268,10 @@ class _PosConfig():
         return {
             "agents": [agent_1, agent_2],
             "targets": [target_1, target_2]}
-        
+
     def config_13(self):
         """
-        crossing vertical parallel pathways, 2 agents
+        left, right, top, 3 agents
         """
         x = self.size / 2
         y = self.size / 2
@@ -277,6 +282,22 @@ class _PosConfig():
         return {
             "agents": [agent_1, agent_2],
             "targets": [target_1, target_2]}
+        
+    def config_100(self):
+        """
+        crossing vertical parallel pathways, 2 agents
+        """
+        x = self.size / 2
+        y = self.size / 2
+        agent_1 = np.array([1, y])
+        agent_2 = np.array([self.size - 2, y])
+        agent_3 = np.array([x, self.size - 2])
+        target_1 = create_wall("right", self.size)
+        target_2 = create_wall("left", self.size)
+        target_3 = create_wall("bottom", self.size)
+        return {
+            "agents": [agent_1, agent_2, agent_3],
+            "targets": [target_1, target_2, target_3]}
 
 class GameConfig():
     def __init__(self, 

@@ -126,6 +126,7 @@ class CNN():
             return
         if move_total%self.target_model_iter==0:
             self._update_target_model()
+            print(f"Updated Target Network at move {move_total}")
         self.replay_sample = self._get_replay_sample()
         self._experience_replay()
 
@@ -154,8 +155,8 @@ class CNN():
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
         # conv 3
-        model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
+        # model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
+        # model.add(MaxPooling2D(pool_size=(2, 2)))
 
         # Flatten
         model.add(Flatten())

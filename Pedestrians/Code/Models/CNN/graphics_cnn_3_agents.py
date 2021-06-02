@@ -19,35 +19,6 @@ from pkg.window import *
 # Miscellaneous
 pp = pprint.PrettyPrinter(indent=4)
 
-# Run Script from Colab
-# args = sys.argv
-# script,env_size,config,speed,num_agents,agent_size,channels,num_actions,games,doom,mode,gamma,mem_max_size,minibatch_size,epoch_size,frac_random,final_epsilon,min_epsilon,learning_rate,tensorboard,target_model_iter = args
-
-# Override Parameters
-gameconfig = GameConfig(
-    env_size=64,
-    config=12,
-    speed=10,
-    num_agents=2,
-    agent_size=8,
-    channels=4,
-    num_actions=5,
-    games=300,
-    doom=False)
-
-nn_config = NNConfig(
-    mode="training",
-    gamma=0.6,
-    mem_max_size=2000,
-    minibatch_size=32,
-    epoch_size=64,
-    frac_random=0.3,
-    final_epsilon=0.01,
-    min_epsilon=0.01,
-    learning_rate = 0.00001,
-    tensorboard = False,
-    target_model_iter = 100)
-
 # Data Paths
 sep = os.path.sep # system path seperator
 os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
@@ -63,28 +34,28 @@ load_model = False
 screenconfig = ScreenConfig(
     headless = False,
     border_size=10)
-# gameconfig = GameConfig(
-#     env_size=int(env_size),
-#     config=int(config),
-#     speed=int(speed),
-#     num_agents=int(num_agents),
-#     agent_size=int(agent_size),
-#     channels=int(channels),
-#     num_actions=int(num_actions),
-#     games=int(games),
-#     doom=int(doom))
-# nn_config = NNConfig(
-#     mode=mode,
-#     gamma=float(gamma),
-#     mem_max_size=int(mem_max_size),
-#     minibatch_size=int(minibatch_size),
-#     epoch_size=int(epoch_size),
-#     frac_random=float(frac_random),
-#     final_epsilon=float(final_epsilon),
-#     min_epsilon=float(min_epsilon),
-#     learning_rate = float(learning_rate),
-#     tensorboard = int(tensorboard),
-#     target_model_iter = int(target_model_iter))
+gameconfig = GameConfig(
+    env_size=256,
+    config=100,
+    speed=10,
+    num_agents=3,
+    agent_size=32,
+    channels=4,
+    num_actions=5,
+    games=100,
+    doom=False)
+nn_config = NNConfig(
+    mode="testing",
+    gamma=0.6,
+    mem_max_size=1000,
+    minibatch_size=32,
+    epoch_size=64,
+    frac_random=0.1,
+    final_epsilon=0.01,
+    min_epsilon=0.01,
+    learning_rate = 0.001,
+    tensorboard = False,
+    target_model_iter = 10)
 
 # Create Functional Classes
 window = Window(screenconfig, gameconfig)
@@ -108,15 +79,15 @@ move_total = 0
 for game in tqdm(range(gameconfig.games)):
     # Reset Board
     stop_list = [False for _ in range(gameconfig.num_agents)] # stop recording experiences
-    [agent_1, agent_2], [target_1, target_2], reward_list, done_list, collided_list, reached_list, breached_list, done = env.reset()
-    cnn.update_pos_buffers([agent_1, agent_2], [target_1, target_2])
-    cnn.update_pos_buffers([agent_1, agent_2], [target_1, target_2]) # padded memory
+    [agent_1, agent_2, agent_3], [target_1, target_2, target_3], reward_list, done_list, collided_list, reached_list, breached_list, done = env.reset()
+    cnn.update_pos_buffers([agent_1, agent_2, agent_3], [target_1, target_2, target_2])
+    cnn.update_pos_buffers([agent_1, agent_2, agent_3], [target_1, target_2, target_2]) # padded memory
 
     # Display Data
     display_info = DisplayInfo(
-        agent_pos = [float2pygame(agent_1, gameconfig.env_size), float2pygame(agent_2, gameconfig.env_size)],
-        target_pos = [float2pygame(target_1, gameconfig.env_size), float2pygame(target_2, gameconfig.env_size)],
-        action_list = [0, 0],
+        agent_pos = [float2pygame(agent_1, gameconfig.env_size), float2pygame(agent_2, gameconfig.env_size), float2pygame(agent_3, gameconfig.env_size)],
+        target_pos = [float2pygame(target_1, gameconfig.env_size), float2pygame(target_2, gameconfig.env_size), float2pygame(target_3, gameconfig.env_size)],
+        action_list = [0, 0, 0],
         reward_list = reward_list,
         done_list = done_list,
         collided_list = collided_list,
@@ -137,13 +108,13 @@ for game in tqdm(range(gameconfig.games)):
         action_list = cnn.act(game, done_list)
 
         # For testing collisions/targets
-        #action_list = [1,2]
+        #action_list = [4,3]
 
         # Take Actions
-        [agent_1, agent_2], [target_1, target_2], reward_list, done_list, collided_list, reached_list, breached_list, done = env.step(action_list)
+        [agent_1, agent_2, agent_3], [target_1, target_2, target_3], reward_list, done_list, collided_list, reached_list, breached_list, done = env.step(action_list)
         
         # Record States
-        cnn.update_pos_buffers([agent_1, agent_2], [target_1, target_2])
+        cnn.update_pos_buffers([agent_1, agent_2, agent_3], [target_1, target_2, target_3])
 
         # Update Experiences
         for agent in range(gameconfig.num_agents):
@@ -157,8 +128,8 @@ for game in tqdm(range(gameconfig.games)):
 
         # Display Data
         display_info = DisplayInfo(
-            agent_pos = [float2pygame(agent_1, gameconfig.env_size), float2pygame(agent_2, gameconfig.env_size)],
-            target_pos = [float2pygame(target_1, gameconfig.env_size), float2pygame(target_2, gameconfig.env_size)],
+            agent_pos = [float2pygame(agent_1, gameconfig.env_size), float2pygame(agent_2, gameconfig.env_size), float2pygame(agent_3, gameconfig.env_size)],
+            target_pos = [float2pygame(target_1, gameconfig.env_size), float2pygame(target_2, gameconfig.env_size), float2pygame(target_3, gameconfig.env_size)],
             action_list = action_list,
             reward_list = reward_list,
             done_list = done_list,
@@ -188,15 +159,8 @@ for game in tqdm(range(gameconfig.games)):
         move_total+=1
 
     # Diagnostics
-    game_sum_reward = 0
     for agent in range(gameconfig.num_agents):
         rewards[agent].append(game_rewards[agent])
-        game_sum_reward += sum(game_rewards[agent])
-
-    # Good Models
-    if game_sum_reward > 0 and store_model:
-        cnn.model.save(store_model_fn + f"_game_{game}")
-        print(f"Model saved at {store_model_fn}")
 
 # Store Model
 if store_model:

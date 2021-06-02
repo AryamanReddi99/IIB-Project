@@ -32,19 +32,19 @@ gameconfig = GameConfig(
     agent_size=8,
     channels=4,
     num_actions=5,
-    games=300,
+    games=50,
     doom=False)
 
 nn_config = NNConfig(
     mode="training",
     gamma=0.6,
     mem_max_size=2000,
-    minibatch_size=32,
-    epoch_size=64,
+    minibatch_size=64,
+    epoch_size=128,
     frac_random=0.3,
     final_epsilon=0.01,
     min_epsilon=0.01,
-    learning_rate = 0.00001,
+    learning_rate = 0.0001,
     tensorboard = False,
     target_model_iter = 100)
 
