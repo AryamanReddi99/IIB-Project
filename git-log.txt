@@ -1,0 +1,98 @@
+* 85fe4b4 Finalised graphics
+* 337e78e Headless enabled
+* 80e0e3a Updated doom
+* 6b1111c updated value passing
+* 29676e4 Added reward tracking
+* 7743731 testing time
+* ddedce2 reversed spike
+* 2ea6b48 sharpened spike
+* a0178fa added reg
+* 72eb202 Added new activation function
+* 3f2dbb9 truncates removed
+* f7575b5 testing divisors
+* 5dc6061 changed readable state
+* f356835 oho
+* f3e7335 updated optimality func
+* b2810d3 fixed optimality
+* 682c0ad fixing
+* 75cb9ee testing changes
+* 8676596 testng train
+* 9c73d94 Setup colab interface for train_nn
+* c873758 DQN working on single i
+* 670bf65 Added nim dn
+* 2cfa339 updated
+* 10b56c9 Updated func
+* 2fbfbb7 added table mag metric
+* 6b05f38 Fixed Q-learner self play replay buffer
+* e0b9e22 Testing QvQ update
+* 045735d Update README.md
+* 8c1cd31 Fixed buffer clears
+* 616a66f Debugging QvQ
+* fe37c66 Imported sys
+* 5ca9800 Updated QvQ to take arguments from sysv
+* feae17f changed to floats
+* 2723160 script changes
+* 7a9376a script change
+* eae5409 Changed args mode
+* ac6a446 script
+* ad7c4d8 args
+* 56857fb Modified QvDet to run from cmd
+* 5173891 test game length
+* 4f6f90d Updated optimality testing
+* 3b03bf1 Fixed QvDet
+* e8f586a Updated Q-Learners
+* fccec01 Nim environment updated
+* b45809e Reworking Nim setup
+* 9985ae0 Testing Changes
+* e7b1630 Testing Changes
+* cb9c578 Testing Changes
+* e469d5b Testing Changes
+* 126c3de Testing Changes
+* 61b7f6b Testing Changes
+* 817c0d4 Testing Changes
+* c43190e Testing Changes
+* ae76bb0 testing changes
+* c5dd187 testing changes
+* 7d8c49d testing changes
+* 9f2c144 testing changes
+* 7d79a4b testing changes
+* cb289df testing changes
+* 352306b 9
+* 55cef47 2
+* f94fdb6 train_cnn
+* bee8d64 Target model iterator added
+* 6394356 Target model implemented
+* 3309ff3 Colab connection trialling
+* 61b3398 Colab working
+* 38c4cf1 Added diagnostics
+* 724c2d1 Cleaning up
+* 93c841e Fixed compile function
+* 52072fc Pyvenv
+* 21bec4b Changed win condition and boundaries. Added testing script. Added demo script. Added new configs for new 'boundless' win condition. Fixed training batch size
+* 6c2395a Added Doom mode
+* 2fda7d7 UI and interface running
+* 230ebdc Bug tested pedestrian env for 2 players
+* f3b254f Refined pedestrians environment for used with CNN
+* 4d54ece linting
+* dbc9c3a Reworked repo
+* b4ca6e1 Recreated pyvenv_ped
+* 9044005 LSTM
+* 08fa883 Testing with extended inputs + math MLP
+* d2ec911 Commiting pedestrians APES library
+* 74f2eb6 DQN Self-play + APES library for pedestrians
+* 8d9d7c6 Porduced some self-play metrics for q-learner
+* af047f1 Self-play metrics
+* af23f5a Self-play
+* 004f9ee Directories restructured
+* d78173d testing ignores
+* ad020d3 Reorganising directories
+* bbc94ea Reset for winter break
+* beda3cb Update README.md
+* ceddc52 Update README.md
+* f066cc1 Obtained some results to put on the readme for presentation
+* 88ec865 Update README.md
+* 75ec46e Added images
+* 3deaf78 Brought legacy code for testing Q vs programmed players forward. Git branch instead?
+* 45bfa81 First attempt at getting Q model to play itself. Something's wrong with the reward system, it keeps picking 1.
+* 4e5b6ac Create README.md
+* 4b2f65f Initial commit. Created:

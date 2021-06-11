@@ -1,3 +1,5 @@
+# For training the model
+
 # Path
 import sys
 sys.path.append('c:\\Users\\Red\\Google_Drive\\IIB_Project\\Pedestrians\\pyvenv_ped')

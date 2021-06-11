@@ -90,7 +90,7 @@ class Window():
         if self.doom:
             self.cacodemon_left = pygame.image.load(pkg_path + f'Doom{sep}caco_left.png')
             self.cacodemon_right = pygame.image.load(pkg_path + f'Doom{sep}caco_right.png')
-            font_3 = pygame.freetype.Font(pkg_path + f"Doom{sep}DooM.ttf", 22)
+            font_3 = pygame.freetype.Font(pkg_path + f"Doom{sep}DooM.ttf", 15)
             self.font = font_3
             self.agent_size = 16
 
@@ -177,8 +177,12 @@ class Window():
         text_spacing = 20
 
         # Write game and move info
-        self.font.render_to(self.text_screen, (5, 5), "Game: " + str(game), self.white)
-        self.font.render_to(self.text_screen, (5, 5 + text_spacing), "Move: " + str(move), self.white)
+        if not self.doom:
+            self.font.render_to(self.text_screen, (5, 5), "Game: " + str(game), self.white)
+            self.font.render_to(self.text_screen, (5, 5 + text_spacing), "Move: " + str(move), self.white)
+        else:
+            self.font.render_to(self.text_screen, (5, 5), "Thank You", self.white)
+            self.font.render_to(self.text_screen, (5, 5+ text_spacing), "Questions?", self.white)
 
         # Write states of agents
         agent_states = [None for _ in range(len(collided_list))]
@@ -193,13 +197,15 @@ class Window():
                 agent_states[agent] = "is searching..."
 
         # Write to Screen
-        self.font.render_to(self.text_screen, (5, 5 + 2*text_spacing), "Agent 1 " + agent_states[0], self.white)
-        self.font.render_to(self.text_screen, (5, 5 + 3*text_spacing), "Agent 2 " + agent_states[1], self.white)
+        if not self.doom:
+            self.font.render_to(self.text_screen, (5, 5 + 2*text_spacing), "Agent 1 " + agent_states[0], self.white)
+            self.font.render_to(self.text_screen, (5, 5 + 3*text_spacing), "Agent 2 " + agent_states[1], self.white)
 
         # Pause and Next Frame
-        self.font.render_to(self.text_screen, (5, self.env_size  + 2*self.border_size - 2*text_spacing), "Press p to pause/unpause", self.white)
-        self.font.render_to(self.text_screen, (5, self.env_size  + 2*self.border_size - text_spacing), "Press n to run next frame", self.white)
-    
+        if not self.doom:
+            self.font.render_to(self.text_screen, (5, self.env_size  + 2*self.border_size - 2*text_spacing), "Press p to pause/unpause", self.white)
+            self.font.render_to(self.text_screen, (5, self.env_size  + 2*self.border_size - text_spacing), "Press n to run next frame", self.white)
+
     def _draw_to_fake(self):
         self.fake_screen.blit(self.border_screen, (self.env_size + 2 * self.border_size, 0))
         self.fake_screen.blit(self.env_screen,(self.env_size + 3 *self.border_size,self.border_size))

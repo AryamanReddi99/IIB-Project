@@ -182,6 +182,8 @@ class _PosConfig():
             11: self.config_11(),
             12: self.config_12(),
             13: self.config_13(),
+            14: self.config_14(),
+            15: self.config_15(),
             100: self.config_100()}
 
     def config_0(self):
@@ -258,6 +260,7 @@ class _PosConfig():
     def config_12(self):
         """
         crossing perpendicular paths, 2 agents
+        left-up
         """
         x = self.size / 2
         y = self.size / 2
@@ -271,21 +274,51 @@ class _PosConfig():
 
     def config_13(self):
         """
-        left, right, top, 3 agents
+        crossing vertical parallel pathways, 2 agents
         """
         x = self.size / 2
         y = self.size / 2
         agent_1 = np.array([x, self.size - 2])
-        agent_2 = np.array([x, 2])
+        agent_2 = np.array([x, 1])
         target_1 = create_wall("bottom", self.size)
         target_2 = create_wall("top", self.size)
         return {
             "agents": [agent_1, agent_2],
             "targets": [target_1, target_2]}
-        
+
+    def config_14(self):
+        """
+        crossing perpendicular paths, 2 agents
+        down-right
+        """
+        x = self.size / 2
+        y = self.size / 2
+        agent_1 = np.array([x, 1])
+        agent_2 = np.array([self.size - 2, y])
+        target_1 = create_wall("top", self.size)
+        target_2 = create_wall("left", self.size)
+        return {
+            "agents": [agent_1, agent_2],
+            "targets": [target_1, target_2]}
+
+    def config_15(self):
+        """
+        crossing perpendicular paths, 2 agents
+        left-down
+        """
+        x = self.size / 2
+        y = self.size / 2
+        agent_1 = np.array([1, y-1])
+        agent_2 = np.array([x, 1])
+        target_1 = create_wall("right", self.size)
+        target_2 = create_wall("top", self.size)
+        return {
+            "agents": [agent_1, agent_2],
+            "targets": [target_1, target_2]}
+
     def config_100(self):
         """
-        crossing vertical parallel pathways, 2 agents
+        left, right, top, 3 agents        
         """
         x = self.size / 2
         y = self.size / 2
@@ -302,7 +335,7 @@ class _PosConfig():
 class GameConfig():
     def __init__(self, 
                  env_size=256,
-                 config=1,
+                 config=14,
                  speed=4,
                  num_agents=2,
                  agent_size=8,

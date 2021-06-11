@@ -1,3 +1,5 @@
+# For testing saves model
+
 # Path
 import sys
 sys.path.append('c:\\Users\\Red\\Google_Drive\\IIB_Project\\Pedestrians\\pyvenv_ped')
@@ -25,7 +27,7 @@ load_model = True
 sep = os.path.sep # system path seperator
 os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
 fn = Path(__file__).stem # this filename
-load_model_fn = "..\\Saved\\Parallel\\train_cnn-31-05-21_16-50\\Model".replace("\\","/")
+load_model_fn = "..\\Saved\\Parallel\\train_cnn-30-05-21_18-08\\Model".replace("\\","/")
 
 # Good Examples
 # Best parallel crossing:
@@ -37,7 +39,7 @@ load_model_fn = "..\\Saved\\Parallel\\train_cnn-31-05-21_16-50\\Model".replace("
 # Create Environment
 gameconfig = GameConfig(
     env_size=64,
-    config=12,
+    config=10,
     speed=10,
     num_agents=2,
     agent_size=7,
