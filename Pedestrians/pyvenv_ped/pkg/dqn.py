@@ -2,8 +2,7 @@ import collections
 import random
 import datetime
 import numpy as np
-import tensorflow as tf
-from keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adam
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, Flatten, BatchNormalization, Activation, Conv2D, MaxPooling2D
 from tensorflow.keras.callbacks import TensorBoard
