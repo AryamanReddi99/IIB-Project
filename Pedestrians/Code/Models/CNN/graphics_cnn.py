@@ -1,12 +1,14 @@
 # This script is for making the agents move in programmed ways for demonstration purposes
 # This script does not use models of any kind
 
-# Path
+# Add pkg to path
+import os
 import sys
-sys.path.append('c:\\Users\\Red\\Google_Drive\\IIB_Project\\Pedestrians\\pyvenv_ped')
+sep = os.path.sep # system path seperator
+sys.path.append('/mnt/c/Users/Red/Desktop/Coding/Projects/IIB-Project/Pedestrians/venv')
+os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
 
 # Imports
-import os
 import time
 import pprint
 import datetime
@@ -23,8 +25,6 @@ from pkg.window import *
 pp = pprint.PrettyPrinter(indent=4)
 
 # Data Paths
-sep = os.path.sep # system path seperator
-os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
 fn = Path(__file__).stem # this filename
 store_model_fn = f"..{sep}Saved{sep}" + fn + datetime.datetime.now().strftime("-%d-%m-%y_%H-%M") + f"{sep}Model"
 
@@ -46,7 +46,7 @@ gameconfig = GameConfig(
     channels=4,
     num_actions=5,
     games=100,
-    doom=True)
+    doom=False)
 nn_config = NNConfig(
     mode="testing",
     gamma=0.6,
@@ -97,6 +97,9 @@ for el in actions_agent_2:
 actions_agent_1_smooth.extend([0]*(max_game_length-len(actions_agent_1_smooth)))
 actions_agent_2_smooth.extend([0]*(max_game_length-len(actions_agent_2_smooth)))
 actions = [(actions_agent_1_smooth[step],actions_agent_2_smooth[step]) for step in range(max_game_length)]
+
+### Diagnostics
+move_total = 0
 
 # Begin Training
 for game in tqdm(range(gameconfig.games)):
@@ -195,16 +198,6 @@ for game in tqdm(range(gameconfig.games)):
         # First run: prep recorder
         if game==0 and gameconfig.doom and move==100:
             break
-
-    # Diagnostics
-    for agent in range(gameconfig.num_agents):
-        rewards[agent].append(game_rewards[agent])
-
-
-# Store Model
-if store_model:
-    cnn.model.save(store_model_fn)
-    print(f"Model saved at {store_model_fn}")
 
 print("Finished")
 

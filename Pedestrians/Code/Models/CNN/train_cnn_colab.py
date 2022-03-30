@@ -3,11 +3,12 @@
 # Add pkg to path
 import os
 import sys
+sep = os.path.sep # system path seperator
+sys.path.append('/mnt/c/Users/Red/Desktop/Coding/Projects/IIB-Project/Pedestrians/venv')
+os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
 
-
-## Imports
+# Imports
 import os
-import sys
 import time
 import pprint
 import datetime
@@ -15,12 +16,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 from tqdm import tqdm
-
-# Import pkg
-sep = os.path.sep # system path seperator
-sys.path.append('/mnt/c/Users/Red/Desktop/Coding/Projects/IIB-Project/Pedestrians/venv')
-os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
-
 from pkg.general import *
 from pkg.env import *
 from pkg.dqn import *
@@ -29,12 +24,12 @@ from pkg.window import *
 # Debugging
 pp = pprint.PrettyPrinter(indent=4)
 
+
 # Data Paths
 sep = os.path.sep # system path seperator
 os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
 fn = Path(__file__).stem # this filename
 store_model_fn = f"..{sep}Saved{sep}" + fn + datetime.datetime.now().strftime("-%d-%m-%y_%H-%M") + f"{sep}Model"
-load_model_fn = ""
 
 # Storage Triggers
 store_img = False
@@ -42,31 +37,36 @@ store_model = True
 load_model = False
 
 # Define Configs
+args = sys.argv
+script,env_size,config,speed,num_agents,agent_size,channels,num_actions,games,doom,mode,gamma,mem_max_size,minibatch_size,epoch_size,frac_random,final_epsilon,min_epsilon,learning_rate,tensorboard,target_model_iter = args
+
 screenconfig = ScreenConfig(
     headless = False,
-    border_size=1)
+    border_size=10)
+
 gameconfig = GameConfig(
-    env_size=8,
-    config=11,
-    speed=1,
-    num_agents=2,
-    agent_size=1,
-    channels=4,
-    num_actions=5,
-    games=100,
-    doom=False)
+    env_size=int(env_size),
+    config=int(config),
+    speed=int(speed),
+    num_agents=int(num_agents),
+    agent_size=int(agent_size),
+    channels=int(channels),
+    num_actions=int(num_actions),
+    games=int(games),
+    doom=int(doom))
+
 nn_config = NNConfig(
-    mode="training",
-    gamma=0.6,
-    mem_max_size=2000,
-    minibatch_size=32,
-    epoch_size=64,
-    frac_random=0.3,
-    final_epsilon=0.01,
-    min_epsilon=0.01,
-    learning_rate = 0.00001,
-    tensorboard = False,
-    target_model_iter = 100)
+    mode=mode,
+    gamma=float(gamma),
+    mem_max_size=int(mem_max_size),
+    minibatch_size=int(minibatch_size),
+    epoch_size=int(epoch_size),
+    frac_random=float(frac_random),
+    final_epsilon=float(final_epsilon),
+    min_epsilon=float(min_epsilon),
+    learning_rate = float(learning_rate),
+    tensorboard = int(tensorboard),
+    target_model_iter = int(target_model_iter))
 
 # Create Functional Classes
 window = Window(screenconfig, gameconfig)
@@ -84,7 +84,6 @@ max_game_length = 50
 
 ### Diagnostics
 rewards = [[] for _ in range(gameconfig.num_agents)]
-game_total_rewards = [[] for _ in range(gameconfig.num_agents)]
 move_total = 0
 
 # Begin Training
@@ -111,8 +110,7 @@ for game in tqdm(range(gameconfig.games)):
     window.display(display_info=display_info) # display info on pygame screen
 
     # Diagnostics
-    game_rewards = [[] for _ in range(gameconfig.num_agents)] # rewards for agents across all games
-    game_total_rewards = [[] for _ in range(gameconfig.num_agents)] # cumulative rewards for agents in each game
+    game_rewards = [[] for _ in range(gameconfig.num_agents)] # rewards for agents
 
     # Play Game
     for move in range(0, max_game_length):
@@ -172,13 +170,13 @@ for game in tqdm(range(gameconfig.games)):
         move_total+=1
 
     # Diagnostics
+    game_sum_reward = 0
     for agent in range(gameconfig.num_agents):
         rewards[agent].append(game_rewards[agent])
-        game_total_rewards[agent].append()
         game_sum_reward += sum(game_rewards[agent])
 
-    # Models where both agents reach
-    if all(env.reached_list) and store_model:
+    # Good Models
+    if game_sum_reward > 0 and store_model:
         cnn.model.save(store_model_fn + f"_game_{game}")
         print(f"Model saved at {store_model_fn}")
 
