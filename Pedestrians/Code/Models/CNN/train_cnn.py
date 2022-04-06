@@ -1,9 +1,4 @@
-# For training the model
-
-# Add pkg to path
-import os
-import sys
-
+### For training the model
 
 ## Imports
 import os
@@ -20,19 +15,17 @@ from tqdm import tqdm
 sep = os.path.sep # system path seperator
 sys.path.append('/mnt/c/Users/Red/Desktop/Coding/Projects/IIB-Project/Pedestrians/venv')
 os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
-
 from pkg.general import *
 from pkg.env import *
 from pkg.dqn import *
 from pkg.window import *
 
-# Debugging
+# Pretty Printer
 pp = pprint.PrettyPrinter(indent=4)
 
 # Data Paths
-sep = os.path.sep # system path seperator
-os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
 fn = Path(__file__).stem # this filename
+store_latest_model_fn = f"..{sep}Saved{sep}Latest"
 store_model_fn = f"..{sep}Saved{sep}" + fn + datetime.datetime.now().strftime("-%d-%m-%y_%H-%M") + f"{sep}Model"
 load_model_fn = ""
 
@@ -46,27 +39,27 @@ screenconfig = ScreenConfig(
     headless = False,
     border_size=1)
 gameconfig = GameConfig(
-    env_size=8,
+    env_size=64,
     config=11,
-    speed=1,
+    speed=8,
     num_agents=2,
-    agent_size=1,
+    agent_size=8,
     channels=4,
     num_actions=5,
     games=100,
     doom=False)
 nn_config = NNConfig(
     mode="training",
-    gamma=0.6,
+    gamma=0.9,
     mem_max_size=2000,
     minibatch_size=32,
-    epoch_size=64,
+    epoch_size=32,
     frac_random=0.3,
     final_epsilon=0.01,
     min_epsilon=0.01,
-    learning_rate = 0.00001,
+    learning_rate = 0.0001,
     tensorboard = False,
-    target_model_iter = 100)
+    target_model_iter = 10)
 
 # Create Functional Classes
 window = Window(screenconfig, gameconfig)
@@ -83,8 +76,8 @@ else:
 max_game_length = 50
 
 ### Diagnostics
-rewards = [[] for _ in range(gameconfig.num_agents)]
-game_total_rewards = [[] for _ in range(gameconfig.num_agents)]
+rewards = [[] for _ in range(gameconfig.num_agents)] # rewards for each episode 
+learning_rate = [] # learning rate of cnn over time
 move_total = 0
 
 # Begin Training
@@ -111,8 +104,7 @@ for game in tqdm(range(gameconfig.games)):
     window.display(display_info=display_info) # display info on pygame screen
 
     # Diagnostics
-    game_rewards = [[] for _ in range(gameconfig.num_agents)] # rewards for agents across all games
-    game_total_rewards = [[] for _ in range(gameconfig.num_agents)] # cumulative rewards for agents in each game
+    game_rewards = [[] for _ in range(gameconfig.num_agents)] # rewards for all agents for one game
 
     # Play Game
     for move in range(0, max_game_length):
@@ -129,12 +121,13 @@ for game in tqdm(range(gameconfig.games)):
         # Record States
         cnn.update_pos_buffers([agent_1, agent_2], [target_1, target_2])
 
-        # Update Experiences
+        # Update Experiences and Diagnostics
         for agent in range(gameconfig.num_agents):
             if stop_list[agent]:
-                # Don't record experiences after agent is done
+                # Don't record experiences or rewards after agent is done
                 continue
             cnn.update_experiences(agent, action_list, reward_list, done_list)
+            game_rewards[agent].append(reward_list[agent])
 
         # Train
         cnn.train(move_total)
@@ -154,13 +147,6 @@ for game in tqdm(range(gameconfig.games)):
             move = move)
         window.display(display_info=display_info) # display info on pygame screen
 
-        ### Diagnostics
-        for agent in range(gameconfig.num_agents):
-            if stop_list[agent]:
-                # Don't record rewards after agent is done
-                continue
-            game_rewards[agent].append(reward_list[agent])
-
         # Stop list is done list lagged by 1
         stop_list = np.copy(done_list)
         if done or move==max_game_length-1:
@@ -174,46 +160,20 @@ for game in tqdm(range(gameconfig.games)):
     # Diagnostics
     for agent in range(gameconfig.num_agents):
         rewards[agent].append(game_rewards[agent])
-        game_total_rewards[agent].append()
-        game_sum_reward += sum(game_rewards[agent])
 
-    # Models where both agents reach
+    # Save models where both agents reach targets
     if all(env.reached_list) and store_model:
         cnn.model.save(store_model_fn + f"_game_{game}")
         print(f"Model saved at {store_model_fn}")
 
-# Store Model
+# Store Final Model
 if store_model:
-    cnn.model.save(store_model_fn)
-    print(f"Model saved at {store_model_fn}")
+    cnn.model.save(store_model_fn + f"_latest")
+    cnn.model.save(store_latest_model_fn)
+    print(f"Model saved at {store_model_fn}_latest \nand\n{store_latest_model_fn}")
+
+# Diagnostics Post-Processing
+total_rewards = [[round(sum(rewards[agent][game]),2) for game in range(gameconfig.games)] for agent in range(gameconfig.num_agents)] # for each agent, get a list of the total reward at the end of each game
+
 
 print("Finished")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

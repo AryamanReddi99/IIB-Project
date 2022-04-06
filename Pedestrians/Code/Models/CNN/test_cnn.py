@@ -1,33 +1,33 @@
-# For testing saves model
+### For testing a model
 
-# Path
-import sys
-sys.path.append('c:\\Users\\Red\\Google_Drive\\IIB_Project\\Pedestrians\\pyvenv_ped')
-
-# Imports
+## Imports
 import os
+import sys
 import time
+import pprint
 import numpy as np
-from datetime import datetime
+import matplotlib.pyplot as plt
 from pathlib import Path
 from tqdm import tqdm
+
+# Import pkg
+sep = os.path.sep # system path seperator
+sys.path.append('/mnt/c/Users/Red/Desktop/Coding/Projects/IIB-Project/Pedestrians/venv')
+os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
 from pkg.general import *
 from pkg.env import *
 from pkg.dqn import *
 from pkg.window import *
 
-
-
-# Storage Triggers
-store_img = True
-store_model = True
-load_model = True
+# Pretty Printer
+pp = pprint.PrettyPrinter(indent=4)
 
 # Data Paths
-sep = os.path.sep # system path seperator
-os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
-fn = Path(__file__).stem # this filename
-load_model_fn = "..\\Saved\\Parallel\\train_cnn-30-05-21_18-08\\Model".replace("\\","/")
+#load_model_fn = "../Saved/train_cnn-31-03-22_18-29/Model_game_95"
+load_model_fn = "../Saved/Latest"
+
+# Storage Triggers
+store_img = False
 
 # Good Examples
 # Best parallel crossing:
@@ -35,40 +35,40 @@ load_model_fn = "..\\Saved\\Parallel\\train_cnn-30-05-21_18-08\\Model".replace("
 # Good perp crossing:
 #..\\Saved\\Perpendicular\\train_cnn-11-03-21_19-58\\Model
 
-
-# Create Environment
+# Define Configs
+screenconfig = ScreenConfig(
+    headless = False,
+    border_size=1)
 gameconfig = GameConfig(
     env_size=64,
-    config=10,
-    speed=10,
+    config=11,
+    speed=8,
     num_agents=2,
-    agent_size=7,
+    agent_size=8,
     channels=4,
     num_actions=5,
     games=100,
     doom=False)
-env = PedEnv(gameconfig)
-
-# Create Display
-screenconfig = ScreenConfig(
-    headless = False,
-    border_size=10)
-window = Window(screenconfig, gameconfig)
-
-# CNN Setup
 nn_config = NNConfig(
-    mode="testing",
-    gamma=0.6,
-    mem_max_size=1000,
+    mode="training",
+    gamma=0.9,
+    mem_max_size=2000,
     minibatch_size=32,
-    frac_random=0.1,
+    epoch_size=32,
+    frac_random=0.3,
     final_epsilon=0.01,
-    min_epsilon=0.01)
+    min_epsilon=0.01,
+    learning_rate = 0.0001,
+    tensorboard = False,
+    target_model_iter = 10)
+
+# Create Functional Classes
+window = Window(screenconfig, gameconfig)
+env = PedEnv(gameconfig)
 cnn = CNN(gameconfig,nn_config)
-if load_model:
-    cnn.load_cnn(load_model_fn)
-else:
-    cnn.create_cnn()
+
+# Get Model
+cnn.load_cnn(load_model_fn)
 
 # Game Parameters
 max_game_length = 50
@@ -76,7 +76,7 @@ max_game_length = 50
 ### Diagnostics
 total_rewards = []
 
-# Begin Training
+# Begin Testing
 for game in tqdm(range(gameconfig.games)):
     # Reset Board
     stop_list = [False for _ in range(gameconfig.num_agents)] # stop recording experiences
