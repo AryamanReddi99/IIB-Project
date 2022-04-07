@@ -3,9 +3,10 @@
 # Add pkg to path
 import os
 import sys
-sep = os.path.sep # system path seperator
-sys.path.append('/mnt/c/Users/Red/Desktop/Coding/Projects/IIB-Project/Pedestrians/venv')
-os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
+
+sep = os.path.sep  # system path seperator
+sys.path.append("/mnt/c/Users/Red/Desktop/Coding/Projects/IIB-Project/Pedestrians/venv")
+os.chdir(os.path.dirname(__file__).replace(sep, sep))  # change to cwd
 
 # Imports
 import os
@@ -26,10 +27,15 @@ pp = pprint.PrettyPrinter(indent=4)
 
 
 # Data Paths
-sep = os.path.sep # system path seperator
-os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
-fn = Path(__file__).stem # this filename
-store_model_fn = f"..{sep}Saved{sep}" + fn + datetime.datetime.now().strftime("-%d-%m-%y_%H-%M") + f"{sep}Model"
+sep = os.path.sep  # system path seperator
+os.chdir(os.path.dirname(__file__).replace(sep, sep))  # change to cwd
+fn = Path(__file__).stem  # this filename
+store_model_fn = (
+    f"..{sep}Saved{sep}"
+    + fn
+    + datetime.datetime.now().strftime("-%d-%m-%y_%H-%M")
+    + f"{sep}Model"
+)
 
 # Storage Triggers
 store_img = False
@@ -38,11 +44,31 @@ load_model = False
 
 # Define Configs
 args = sys.argv
-script,env_size,config,speed,num_agents,agent_size,channels,num_actions,games,doom,mode,gamma,mem_max_size,minibatch_size,epoch_size,frac_random,final_epsilon,min_epsilon,learning_rate,tensorboard,target_model_iter = args
+(
+    script,
+    env_size,
+    config,
+    speed,
+    num_agents,
+    agent_size,
+    channels,
+    num_actions,
+    games,
+    doom,
+    mode,
+    gamma,
+    mem_max_size,
+    minibatch_size,
+    epoch_size,
+    frac_random,
+    final_epsilon,
+    min_epsilon,
+    learning_rate,
+    tensorboard,
+    target_model_iter,
+) = args
 
-screenconfig = ScreenConfig(
-    headless = False,
-    border_size=10)
+screenconfig = ScreenConfig(headless=False, border_size=10)
 
 gameconfig = GameConfig(
     env_size=int(env_size),
@@ -53,7 +79,8 @@ gameconfig = GameConfig(
     channels=int(channels),
     num_actions=int(num_actions),
     games=int(games),
-    doom=int(doom))
+    doom=int(doom),
+)
 
 nn_config = NNConfig(
     mode=mode,
@@ -64,14 +91,15 @@ nn_config = NNConfig(
     frac_random=float(frac_random),
     final_epsilon=float(final_epsilon),
     min_epsilon=float(min_epsilon),
-    learning_rate = float(learning_rate),
-    tensorboard = int(tensorboard),
-    target_model_iter = int(target_model_iter))
+    learning_rate=float(learning_rate),
+    tensorboard=int(tensorboard),
+    target_model_iter=int(target_model_iter),
+)
 
 # Create Functional Classes
 window = Window(screenconfig, gameconfig)
 env = PedEnv(gameconfig)
-cnn = CNN(gameconfig,nn_config)
+cnn = CNN(gameconfig, nn_config)
 
 # Get Model
 if load_model:
@@ -89,28 +117,46 @@ move_total = 0
 # Begin Training
 for game in tqdm(range(gameconfig.games)):
     # Reset Board
-    stop_list = [False for _ in range(gameconfig.num_agents)] # stop recording experiences
-    [agent_1, agent_2], [target_1, target_2], reward_list, done_list, collided_list, reached_list, breached_list, done = env.reset()
+    stop_list = [
+        False for _ in range(gameconfig.num_agents)
+    ]  # stop recording experiences
+    (
+        [agent_1, agent_2],
+        [target_1, target_2],
+        reward_list,
+        done_list,
+        collided_list,
+        reached_list,
+        breached_list,
+        done,
+    ) = env.reset()
     cnn.update_pos_buffers([agent_1, agent_2], [target_1, target_2])
-    cnn.update_pos_buffers([agent_1, agent_2], [target_1, target_2]) # padded memory
+    cnn.update_pos_buffers([agent_1, agent_2], [target_1, target_2])  # padded memory
 
     # Display Data
     display_info = DisplayInfo(
-        agent_pos = [float2pygame(agent_1, gameconfig.env_size), float2pygame(agent_2, gameconfig.env_size)],
-        target_pos = [float2pygame(target_1, gameconfig.env_size), float2pygame(target_2, gameconfig.env_size)],
-        action_list = [0, 0],
-        reward_list = reward_list,
-        done_list = done_list,
-        collided_list = collided_list,
-        reached_list = reached_list,
-        breached_list = breached_list,
-        done = done,
-        game = game,
-        move = 0)
-    window.display(display_info=display_info) # display info on pygame screen
+        agent_pos=[
+            float2pygame(agent_1, gameconfig.env_size),
+            float2pygame(agent_2, gameconfig.env_size),
+        ],
+        target_pos=[
+            float2pygame(target_1, gameconfig.env_size),
+            float2pygame(target_2, gameconfig.env_size),
+        ],
+        action_list=[0, 0],
+        reward_list=reward_list,
+        done_list=done_list,
+        collided_list=collided_list,
+        reached_list=reached_list,
+        breached_list=breached_list,
+        done=done,
+        game=game,
+        move=0,
+    )
+    window.display(display_info=display_info)  # display info on pygame screen
 
     # Diagnostics
-    game_rewards = [[] for _ in range(gameconfig.num_agents)] # rewards for agents
+    game_rewards = [[] for _ in range(gameconfig.num_agents)]  # rewards for agents
 
     # Play Game
     for move in range(0, max_game_length):
@@ -119,11 +165,20 @@ for game in tqdm(range(gameconfig.games)):
         action_list = cnn.act(game, done_list)
 
         # For testing collisions/targets
-        #action_list = [1,2]
+        # action_list = [1,2]
 
         # Take Actions
-        [agent_1, agent_2], [target_1, target_2], reward_list, done_list, collided_list, reached_list, breached_list, done = env.step(action_list)
-        
+        (
+            [agent_1, agent_2],
+            [target_1, target_2],
+            reward_list,
+            done_list,
+            collided_list,
+            reached_list,
+            breached_list,
+            done,
+        ) = env.step(action_list)
+
         # Record States
         cnn.update_pos_buffers([agent_1, agent_2], [target_1, target_2])
 
@@ -139,18 +194,25 @@ for game in tqdm(range(gameconfig.games)):
 
         # Display Data
         display_info = DisplayInfo(
-            agent_pos = [float2pygame(agent_1, gameconfig.env_size), float2pygame(agent_2, gameconfig.env_size)],
-            target_pos = [float2pygame(target_1, gameconfig.env_size), float2pygame(target_2, gameconfig.env_size)],
-            action_list = action_list,
-            reward_list = reward_list,
-            done_list = done_list,
-            collided_list = collided_list,
-            reached_list = reached_list,
-            breached_list = breached_list,
-            done = done,
-            game = game,
-            move = move)
-        window.display(display_info=display_info) # display info on pygame screen
+            agent_pos=[
+                float2pygame(agent_1, gameconfig.env_size),
+                float2pygame(agent_2, gameconfig.env_size),
+            ],
+            target_pos=[
+                float2pygame(target_1, gameconfig.env_size),
+                float2pygame(target_2, gameconfig.env_size),
+            ],
+            action_list=action_list,
+            reward_list=reward_list,
+            done_list=done_list,
+            collided_list=collided_list,
+            reached_list=reached_list,
+            breached_list=breached_list,
+            done=done,
+            game=game,
+            move=move,
+        )
+        window.display(display_info=display_info)  # display info on pygame screen
 
         ### Diagnostics
         for agent in range(gameconfig.num_agents):
@@ -161,13 +223,13 @@ for game in tqdm(range(gameconfig.games)):
 
         # Stop list is done list lagged by 1
         stop_list = np.copy(done_list)
-        if done or move==max_game_length-1:
+        if done or move == max_game_length - 1:
             if not screenconfig.headless:
                 time.sleep(0.2)
             break
 
         # Update total moves
-        move_total+=1
+        move_total += 1
 
     # Diagnostics
     game_sum_reward = 0
@@ -186,32 +248,3 @@ if store_model:
     print(f"Model saved at {store_model_fn}")
 
 print("Finished")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

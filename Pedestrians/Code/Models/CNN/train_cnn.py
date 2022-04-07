@@ -12,21 +12,27 @@ from pathlib import Path
 from tqdm import tqdm
 
 # Import pkg
-sep = os.path.sep # system path seperator
-sys.path.append('/mnt/c/Users/Red/Desktop/Coding/Projects/IIB-Project/Pedestrians/venv')
-os.chdir(os.path.dirname(__file__).replace(sep,sep)) # change to cwd
+sep = os.path.sep  # system path seperator
+sys.path.append("/mnt/c/Users/Red/Desktop/Coding/Projects/IIB-Project/Pedestrians/venv")
+os.chdir(os.path.dirname(__file__).replace(sep, sep))  # change to cwd
 from pkg.general import *
 from pkg.env import *
 from pkg.dqn import *
 from pkg.window import *
+from pkg.diagnostics import *
 
 # Pretty Printer
 pp = pprint.PrettyPrinter(indent=4)
 
 # Data Paths
-fn = Path(__file__).stem # this filename
+fn = Path(__file__).stem  # this filename
 store_latest_model_fn = f"..{sep}Saved{sep}Latest"
-store_model_fn = f"..{sep}Saved{sep}" + fn + datetime.datetime.now().strftime("-%d-%m-%y_%H-%M") + f"{sep}Model"
+store_model_fn = (
+    f"..{sep}Saved{sep}"
+    + fn
+    + datetime.datetime.now().strftime("-%d-%m-%y_%H-%M")
+    + f"{sep}Model"
+)
 load_model_fn = ""
 
 # Storage Triggers
@@ -35,9 +41,7 @@ store_model = True
 load_model = False
 
 # Define Configs
-screenconfig = ScreenConfig(
-    headless = False,
-    border_size=1)
+screenconfig = ScreenConfig(headless=False, border_size=1)
 gameconfig = GameConfig(
     env_size=64,
     config=11,
@@ -47,7 +51,9 @@ gameconfig = GameConfig(
     channels=4,
     num_actions=5,
     games=100,
-    doom=False)
+    max_game_length=50,
+    doom=False,
+)
 nn_config = NNConfig(
     mode="training",
     gamma=0.9,
@@ -57,14 +63,16 @@ nn_config = NNConfig(
     frac_random=0.3,
     final_epsilon=0.01,
     min_epsilon=0.01,
-    learning_rate = 0.0001,
-    tensorboard = False,
-    target_model_iter = 10)
+    learning_rate=0.0001,
+    tensorboard=False,
+    target_model_iter=10,
+)
 
 # Create Functional Classes
 window = Window(screenconfig, gameconfig)
 env = PedEnv(gameconfig)
-cnn = CNN(gameconfig,nn_config)
+mock_env = PedEnv(gameconfig)
+cnn = CNN(gameconfig, nn_config)
 
 # Get Model
 if load_model:
@@ -72,52 +80,82 @@ if load_model:
 else:
     cnn.create_cnn()
 
-# Game Parameters
-max_game_length = 50
-
 ### Diagnostics
-rewards = [[] for _ in range(gameconfig.num_agents)] # rewards for each episode 
-learning_rate = [] # learning rate of cnn over time
+rewards = [[] for _ in range(gameconfig.num_agents)]  # rewards for each episode
+rewards_mock = [
+    [] for _ in range(gameconfig.num_agents)
+]  # mock environment rewards for each episode
+learning_rate = []  # learning rate of cnn over time
 move_total = 0
 
 # Begin Training
 for game in tqdm(range(gameconfig.games)):
+
     # Reset Board
-    stop_list = [False for _ in range(gameconfig.num_agents)] # stop recording experiences
-    [agent_1, agent_2], [target_1, target_2], reward_list, done_list, collided_list, reached_list, breached_list, done = env.reset()
+    stop_list = [
+        False for _ in range(gameconfig.num_agents)
+    ]  # stop recording experiences
+    (
+        [agent_1, agent_2],
+        [target_1, target_2],
+        reward_list,
+        done_list,
+        collided_list,
+        reached_list,
+        breached_list,
+        done,
+    ) = env.reset()
     cnn.update_pos_buffers([agent_1, agent_2], [target_1, target_2])
-    cnn.update_pos_buffers([agent_1, agent_2], [target_1, target_2]) # padded memory
+    cnn.update_pos_buffers([agent_1, agent_2], [target_1, target_2])  # padded memory
 
     # Display Data
     display_info = DisplayInfo(
-        agent_pos = [float2pygame(agent_1, gameconfig.env_size), float2pygame(agent_2, gameconfig.env_size)],
-        target_pos = [float2pygame(target_1, gameconfig.env_size), float2pygame(target_2, gameconfig.env_size)],
-        action_list = [0, 0],
-        reward_list = reward_list,
-        done_list = done_list,
-        collided_list = collided_list,
-        reached_list = reached_list,
-        breached_list = breached_list,
-        done = done,
-        game = game,
-        move = 0)
-    window.display(display_info=display_info) # display info on pygame screen
+        agent_pos=[
+            float2pygame(agent_1, gameconfig.env_size),
+            float2pygame(agent_2, gameconfig.env_size),
+        ],
+        target_pos=[
+            float2pygame(target_1, gameconfig.env_size),
+            float2pygame(target_2, gameconfig.env_size),
+        ],
+        action_list=[0, 0],
+        reward_list=reward_list,
+        done_list=done_list,
+        collided_list=collided_list,
+        reached_list=reached_list,
+        breached_list=breached_list,
+        done=done,
+        game=game,
+        move=0,
+    )
+    window.display(display_info=display_info)  # display info on pygame screen
 
     # Diagnostics
-    game_rewards = [[] for _ in range(gameconfig.num_agents)] # rewards for all agents for one game
+    game_rewards = [
+        [] for _ in range(gameconfig.num_agents)
+    ]  # rewards for all agents for one game
 
     # Play Game
-    for move in range(0, max_game_length):
+    for move in range(0, gameconfig.max_game_length):
 
         # Get CNN Actions
         action_list = cnn.act(game, done_list)
 
         # For testing collisions/targets
-        #action_list = [1,2]
+        # action_list = [1,2]
 
         # Take Actions
-        [agent_1, agent_2], [target_1, target_2], reward_list, done_list, collided_list, reached_list, breached_list, done = env.step(action_list)
-        
+        (
+            [agent_1, agent_2],
+            [target_1, target_2],
+            reward_list,
+            done_list,
+            collided_list,
+            reached_list,
+            breached_list,
+            done,
+        ) = env.step(action_list)
+
         # Record States
         cnn.update_pos_buffers([agent_1, agent_2], [target_1, target_2])
 
@@ -134,30 +172,39 @@ for game in tqdm(range(gameconfig.games)):
 
         # Display Data
         display_info = DisplayInfo(
-            agent_pos = [float2pygame(agent_1, gameconfig.env_size), float2pygame(agent_2, gameconfig.env_size)],
-            target_pos = [float2pygame(target_1, gameconfig.env_size), float2pygame(target_2, gameconfig.env_size)],
-            action_list = action_list,
-            reward_list = reward_list,
-            done_list = done_list,
-            collided_list = collided_list,
-            reached_list = reached_list,
-            breached_list = breached_list,
-            done = done,
-            game = game,
-            move = move)
-        window.display(display_info=display_info) # display info on pygame screen
+            agent_pos=[
+                float2pygame(agent_1, gameconfig.env_size),
+                float2pygame(agent_2, gameconfig.env_size),
+            ],
+            target_pos=[
+                float2pygame(target_1, gameconfig.env_size),
+                float2pygame(target_2, gameconfig.env_size),
+            ],
+            action_list=action_list,
+            reward_list=reward_list,
+            done_list=done_list,
+            collided_list=collided_list,
+            reached_list=reached_list,
+            breached_list=breached_list,
+            done=done,
+            game=game,
+            move=move,
+        )
+        window.display(display_info=display_info)  # display info on pygame screen
+
+        # Update total moves
+        move_total += 1
 
         # Stop list is done list lagged by 1
         stop_list = np.copy(done_list)
-        if done or move==max_game_length-1:
+        if done or move == gameconfig.max_game_length - 1:
             if not screenconfig.headless:
                 time.sleep(0.2)
             break
-
-        # Update total moves
-        move_total+=1
-
-    # Diagnostics
+    
+    ## Diagnostics
+    # Mock environment
+    
     for agent in range(gameconfig.num_agents):
         rewards[agent].append(game_rewards[agent])
 
@@ -173,7 +220,10 @@ if store_model:
     print(f"Model saved at {store_model_fn}_latest \nand\n{store_latest_model_fn}")
 
 # Diagnostics Post-Processing
-total_rewards = [[round(sum(rewards[agent][game]),2) for game in range(gameconfig.games)] for agent in range(gameconfig.num_agents)] # for each agent, get a list of the total reward at the end of each game
+total_rewards = [
+    [round(sum(rewards[agent][game]), 2) for game in range(gameconfig.games)]
+    for agent in range(gameconfig.num_agents)
+]  # for each agent, get a list of the total reward at the end of each game
 
 
 print("Finished")

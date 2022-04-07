@@ -2,11 +2,13 @@ import numpy as np
 from random import randint
 from collections import OrderedDict
 
+
 def bound(low, high, value):
     """
     Bounds value between low, high
     """
     return max(low, min(high, value))
+
 
 def float2mat(pos, size):
     """
@@ -27,30 +29,34 @@ def float2mat(pos, size):
             mat = np.zeros([size, size])
         except:
             raise TypeError("position must be integer")
-        
+
         # if outside bounds, all-0 matrix
-        if x >= 0 and x <= size-1 and y >= 0 and y <= size-1:
+        if x >= 0 and x <= size - 1 and y >= 0 and y <= size - 1:
             mat[size - 1 - y, x] = 1
     return mat
+
 
 def mat2float(arr):
     """
     converts point/wall position in matrix form back to float form
     """
     env_size, _ = arr.shape
-    indices = np.argwhere(arr) # indices of non-zero points
-    flipped_indices = np.flip(indices, axis=1) # flip x and y coords
+    indices = np.argwhere(arr)  # indices of non-zero points
+    flipped_indices = np.flip(indices, axis=1)  # flip x and y coords
     if len(flipped_indices) > 1:
         # wall
-        flipped_indices[:,1]=env_size -1 - flipped_indices[:,1] # flip y about centre
+        flipped_indices[:, 1] = (
+            env_size - 1 - flipped_indices[:, 1]
+        )  # flip y about centre
         return flipped_indices
     elif len(flipped_indices) == 1:
         # point
-        [[x, ny]] = flipped_indices # y is flipped with np array
-        return np.array([x, env_size -1 - ny]).astype(int)
+        [[x, ny]] = flipped_indices  # y is flipped with np array
+        return np.array([x, env_size - 1 - ny]).astype(int)
     else:
         # not on grid
-        return np.array([-1,-1]).astype(int)
+        return np.array([-1, -1]).astype(int)
+
 
 def float2pygame(pos, size):
     """
@@ -69,34 +75,37 @@ def float2pygame(pos, size):
             raise TypeError("position must be integer")
         return np.array([x, size - 1 - y])
 
+
 def arr2stack(arr):
     """
-    converts from ndarray list of channels (channels,size,size) to 
+    converts from ndarray list of channels (channels,size,size) to
     model-friendly RGB-stack format (1,size,size,channels)
     """
     channels, env_size, _ = arr.shape
-    return np.transpose(arr, (1,2,0)).reshape(1,env_size,env_size,channels)
+    return np.transpose(arr, (1, 2, 0)).reshape(1, env_size, env_size, channels)
+
 
 def stack2arr(arr):
     """
     converts from model-friendly RGB stack format to ndarray list of
-    separate channels 
+    separate channels
     """
-    return np.transpose(np.squeeze(arr), (2,0,1))
+    return np.transpose(np.squeeze(arr), (2, 0, 1))
+
 
 def which_wall(pos):
     """
-    Given pos array, determine which wall we're looking at 
+    Given pos array, determine which wall we're looking at
     """
     # [x,y] -> [bool, bool] for fixed wall axis
     # e.g. vertical wall    -> [True, False]
     # e.g. horizontal wall  -> [False, True]
 
     env_size, _ = pos.shape
-    wall_alignment = np.equal(pos,np.flip(pos,axis=0)).all(axis=0)
+    wall_alignment = np.equal(pos, np.flip(pos, axis=0)).all(axis=0)
     # Vertical walls
     if wall_alignment[0]:
-        # Left 
+        # Left
         if pos[0][0] == 0:
             return "left"
         # Right
@@ -112,23 +121,25 @@ def which_wall(pos):
             return "top"
     raise ValueError("Invalid wall!")
 
+
 def create_wall(wall, size):
     """
     returns a wall target for a given env size
     wall format is list of 2-D numpy arrays with coordinates of wall
     wall coordinates must be at edges of environment
     """
-    if wall=="top":
+    if wall == "top":
         wall = [np.array([i, size - 1]) for i in range(0, size)]
-    elif wall=="bottom":
+    elif wall == "bottom":
         wall = [np.array([i, 0]) for i in range(0, size)]
-    elif wall=="left":
+    elif wall == "left":
         wall = [np.array([0, i]) for i in range(0, size)]
-    elif wall=="right":
+    elif wall == "right":
         wall = [np.array([size - 1, i]) for i in range(0, size)]
     else:
         raise ValueError("Incorrect argument for wall")
     return wall
+
 
 def pretty_state(state):
     """
@@ -136,8 +147,9 @@ def pretty_state(state):
     """
     state_list_format = stack2arr(state)
     pretty_list = list(map(lambda x: mat2float(x), state_list_format))
-    pretty_list[1] = which_wall(pretty_list[1]) # convert wall
+    pretty_list[1] = which_wall(pretty_list[1])  # convert wall
     return pretty_list
+
 
 def pretty_experience(experience):
     """
@@ -152,7 +164,8 @@ def pretty_experience(experience):
     pretty_experience["done"] = done
     return pretty_experience
 
-class _PosConfig():
+
+class _PosConfig:
     """
     Internal class in GameConfig()
     Contains ready-made agent/target position configs to be used
@@ -176,15 +189,16 @@ class _PosConfig():
     def __init__(self, size):
         self.size = size
         self.configs = {
-            0:  self.config_0(), 
-            1:  self.config_1(), 
-            2:  self.config_2(), 
+            0: self.config_0(),
+            1: self.config_1(),
+            2: self.config_2(),
             11: self.config_11(),
             12: self.config_12(),
             13: self.config_13(),
             14: self.config_14(),
             15: self.config_15(),
-            100: self.config_100()}
+            100: self.config_100(),
+        }
 
     def config_0(self):
         """
@@ -204,16 +218,9 @@ class _PosConfig():
             # need arrays to be unique so positions don't clash
             unique_list = [agent_1, agent_2, target_1, target_2]
             for i, arr in enumerate(unique_list):
-                if len(
-                    list(
-                        filter(
-                            lambda x: (
-                                x == arr).all(),
-                            unique_list))) > 1:
+                if len(list(filter(lambda x: (x == arr).all(), unique_list))) > 1:
                     unique = False
-        return {
-            "agents": [agent_1, agent_2],
-            "targets": [target_1, target_2]}
+        return {"agents": [agent_1, agent_2], "targets": [target_1, target_2]}
 
     def config_1(self):
         """
@@ -225,9 +232,7 @@ class _PosConfig():
         agent_2 = np.array([x * 5, y])
         target_1 = np.array([x * 6, y])
         target_2 = np.array([x * 2, y])
-        return {
-            "agents": [agent_1, agent_2],
-            "targets": [target_1, target_2]}
+        return {"agents": [agent_1, agent_2], "targets": [target_1, target_2]}
 
     def config_2(self):
         """
@@ -239,9 +244,7 @@ class _PosConfig():
         agent_2 = np.array([x, y * 2])
         target_1 = np.array([x * 2, y])
         target_2 = np.array([x * 3, y * 2])
-        return {
-            "agents": [agent_1, agent_2],
-            "targets": [target_1, target_2]}
+        return {"agents": [agent_1, agent_2], "targets": [target_1, target_2]}
 
     def config_11(self):
         """
@@ -252,9 +255,7 @@ class _PosConfig():
         agent_2 = np.array([self.size - 2, y])
         target_1 = create_wall("right", self.size)
         target_2 = create_wall("left", self.size)
-        return {
-            "agents": [agent_1, agent_2],
-            "targets": [target_1, target_2]}
+        return {"agents": [agent_1, agent_2], "targets": [target_1, target_2]}
 
     def config_12(self):
         """
@@ -267,9 +268,7 @@ class _PosConfig():
         agent_2 = np.array([x, self.size - 2])
         target_1 = create_wall("right", self.size)
         target_2 = create_wall("bottom", self.size)
-        return {
-            "agents": [agent_1, agent_2],
-            "targets": [target_1, target_2]}
+        return {"agents": [agent_1, agent_2], "targets": [target_1, target_2]}
 
     def config_13(self):
         """
@@ -280,9 +279,7 @@ class _PosConfig():
         agent_2 = np.array([x, 1])
         target_1 = create_wall("bottom", self.size)
         target_2 = create_wall("top", self.size)
-        return {
-            "agents": [agent_1, agent_2],
-            "targets": [target_1, target_2]}
+        return {"agents": [agent_1, agent_2], "targets": [target_1, target_2]}
 
     def config_14(self):
         """
@@ -295,9 +292,7 @@ class _PosConfig():
         agent_2 = np.array([self.size - 2, y])
         target_1 = create_wall("top", self.size)
         target_2 = create_wall("left", self.size)
-        return {
-            "agents": [agent_1, agent_2],
-            "targets": [target_1, target_2]}
+        return {"agents": [agent_1, agent_2], "targets": [target_1, target_2]}
 
     def config_15(self):
         """
@@ -306,17 +301,15 @@ class _PosConfig():
         """
         x = self.size / 2
         y = self.size / 2
-        agent_1 = np.array([1, y-1])
+        agent_1 = np.array([1, y - 1])
         agent_2 = np.array([x, 1])
         target_1 = create_wall("right", self.size)
         target_2 = create_wall("top", self.size)
-        return {
-            "agents": [agent_1, agent_2],
-            "targets": [target_1, target_2]}
+        return {"agents": [agent_1, agent_2], "targets": [target_1, target_2]}
 
     def config_100(self):
         """
-        left, right, top, 3 agents        
+        left, right, top, 3 agents
         """
         x = self.size / 2
         y = self.size / 2
@@ -328,20 +321,24 @@ class _PosConfig():
         target_3 = create_wall("bottom", self.size)
         return {
             "agents": [agent_1, agent_2, agent_3],
-            "targets": [target_1, target_2, target_3]}
+            "targets": [target_1, target_2, target_3],
+        }
 
-class GameConfig():
-    def __init__(self, 
-                 env_size=256,
-                 config=14,
-                 speed=4,
-                 num_agents=2,
-                 agent_size=8,
-                 channels=4,
-                 num_actions=5,
-                 games = 100,
-                 doom = False
-                 ):
+
+class GameConfig:
+    def __init__(
+        self,
+        env_size=256,
+        config=14,
+        speed=4,
+        num_agents=2,
+        agent_size=8,
+        channels=4,
+        num_actions=5,
+        games=100,
+        max_game_length=50,
+        doom=False,
+    ):
 
         # Starting Configurations
         self.posconfig = _PosConfig(env_size)
@@ -356,18 +353,23 @@ class GameConfig():
         self.channels = channels
         self.num_actions = num_actions
         self.games = games
+        self.max_game_length = max_game_length
 
         # Assertions
-        assert(self.speed <= 2*np.sqrt(2)*self.agent_size)
+        assert self.speed <= 2 * np.sqrt(2) * self.agent_size
 
         # Doom
         self.doom = doom
 
+
 ####################################### main() ####################################
+
 
 def main():
     posconfig = _PosConfig(64)
+    gameconfig = GameConfig(env_size=256, config=1, speed=4, num_agents=2, agent_size=5)
     print(posconfig.configs)
+
 
 if __name__ == "__main__":
     main()

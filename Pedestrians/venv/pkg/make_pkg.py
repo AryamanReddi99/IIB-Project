@@ -9,12 +9,11 @@ start_dir = os.path.dirname(os.path.realpath(__file__))
 
 # recursively add __init__.py
 for dir, subdirs, files in os.walk(start_dir):
-    f = open(os.path.join(dir,"__init__.py"), "w")
+    f = open(os.path.join(dir, "__init__.py"), "w")
 
 # symlink
 src = start_dir
 src_basename = os.path.basename(start_dir)
 dest_dir = os.path.dirname(os.path.dirname(start_dir))
-dest = os.path.join(dest_dir,src_basename)
-os.symlink(src,dest)
-
+dest = os.path.join(dest_dir, src_basename)
+os.symlink(src, dest)

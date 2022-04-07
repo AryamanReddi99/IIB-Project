@@ -3,7 +3,7 @@ from random import randint
 from .general import *
 
 
-class PedEnv():
+class PedEnv:
     """
     pedestrians environment
     "i" in agent_pos denotes which agent we are referring to
@@ -18,12 +18,13 @@ class PedEnv():
         self.original_target_pos = np.copy(gameconfig.pos_dict_initial["targets"])
 
         # game params
-        self.config = gameconfig.config
         self.env_size = gameconfig.env_size
+        self.config = gameconfig.config
         self.speed = gameconfig.speed
         self.num_agents = gameconfig.num_agents
         self.agent_size = gameconfig.agent_size
         self.num_actions = gameconfig.num_actions
+        self.max_game_length = gameconfig.max_game_length
 
         # env params
         self.done = 0
@@ -36,7 +37,7 @@ class PedEnv():
         """
         check if agent has collided with agent or target
         """
-        if np.linalg.norm(pos1 - pos2) < 2*self.agent_size:
+        if np.linalg.norm(pos1 - pos2) < 2 * self.agent_size:
             return True
         return False
 
@@ -44,7 +45,7 @@ class PedEnv():
         """
         check if agent has collided with wall
         """
-        if np.linalg.norm(pos1 - pos2) < 2*self.agent_size:
+        if np.linalg.norm(pos1 - pos2) < 2 * self.agent_size:
             return True
         return False
 
@@ -55,7 +56,9 @@ class PedEnv():
         if self.config < 10:
             # ball targets
             for agent, pos in enumerate(self.agent_pos):
-                self.reached_list[agent] = self._check_collision_ball(pos, self.target_pos[agent])
+                self.reached_list[agent] = self._check_collision_ball(
+                    pos, self.target_pos[agent]
+                )
         elif self.config < 20:
             # Check if correct wall has been passed
             for agent, pos in enumerate(self.agent_pos):
@@ -126,7 +129,15 @@ class PedEnv():
         self.agent_pos = np.copy(self.original_agent_pos)
         self.target_pos = np.copy(self.original_target_pos)
 
-        return (*self._update_state(), self.reward_list, self.done_list, self.collided_list, self.reached_list, self.breached_list, self.done)
+        return (
+            *self._update_state(),
+            self.reward_list,
+            self.done_list,
+            self.collided_list,
+            self.reached_list,
+            self.breached_list,
+            self.done,
+        )
 
     def action_space_sample(self):
         """
@@ -175,17 +186,22 @@ class PedEnv():
         if all(self.done_list):
             self.done = 1
 
-        return (*self._update_state(), self.reward_list, self.done_list, self.collided_list, self.reached_list, self.breached_list, self.done)
+        return (
+            *self._update_state(),
+            self.reward_list,
+            self.done_list,
+            self.collided_list,
+            self.reached_list,
+            self.breached_list,
+            self.done,
+        )
+
 
 ####################################### main() ####################################
 
+
 def main():
-    gameconfig = GameConfig(
-        env_size=256,
-        config=1,
-        speed=4,
-        num_agents=2,
-        agent_size=5)
+    gameconfig = GameConfig(env_size=256, config=1, speed=4, num_agents=2, agent_size=5)
     env = PedEnv(gameconfig)
     print("Finished")
 
