@@ -178,12 +178,6 @@ class CNN:
         # Max Pooling 2
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
-        # Conv 3
-        model.add(Conv2D(64, (3, 3), padding="same", activation="relu"))
-
-        # Max Pooling 3
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-
         # Flatten
         model.add(Flatten())
 
@@ -192,6 +186,9 @@ class CNN:
 
         # Dense 2
         model.add(Dense(128, activation="relu"))
+
+        # Dense 2
+        model.add(Dense(64, activation="relu"))
 
         # output
         model.add(Dense(self.num_actions))

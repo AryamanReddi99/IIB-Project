@@ -38,18 +38,18 @@ store_img = False
 # Define Configs
 screenconfig = ScreenConfig(headless=False, border_size=1)
 gameconfig = GameConfig(
-    env_size=64,
+    env_size=8,
     config=11,
-    speed=8,
+    speed=1,
     num_agents=2,
-    agent_size=8,
+    agent_size=1,
     channels=4,
     num_actions=5,
     games=100,
     doom=False,
 )
 nn_config = NNConfig(
-    mode="training",
+    mode="testing",
     gamma=0.9,
     mem_max_size=2000,
     minibatch_size=32,

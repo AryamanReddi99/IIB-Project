@@ -31,24 +31,28 @@ def write_training_details(gameconfig, nn_config, fn):
     nn_config_dict = {k: v for k, v in nn_config.__dict__.items()}
     f.write("nn_config = NNConfig(\n")
     for key in nn_config_dict:
-        f.write(f"\t{key}: {nn_config_dict[key]},\n")
-    f.write("}")
+        if key == "mode":
+            f.write(f'\t{key} = "{nn_config_dict[key]}",\n')
+        else:
+            f.write(f"\t{key} = {nn_config_dict[key]},\n")
+    f.write(")")
 
 
 def plot_scores(scores, fn):
     """
     Plot and save fig of the scores (cumulative rewards) of the model agents over a number of games
     """
-    # assert all lists are same length
+    # Assert all lists are same length
     assert len({len(agent_scores) for agent_scores in scores}) == 1
 
-    # plot
+    # Plot
     games = np.arange(1, len(scores[0]) + 1)
     fig = plt.figure()
-    for agent_scores in scores:
-        plt.plot(games, agent_scores)
+    for agent, agent_scores in enumerate(scores):
+        plt.plot(games, agent_scores, label=f"Agent {agent}")
     plt.xlabel("Game")
     plt.ylabel("Cumulative Reward")
+    plt.title("Agent Scores during Training")
     fig.savefig(fn)
 
 
@@ -100,8 +104,9 @@ def mock_game_cnn(cnn, mock_env):
                 continue
             game_rewards[agent].append(reward_list[agent])
 
-        # Stop Condition
-        if done or move == mock_env.max_game_length - 1:
+        # Stop list is done list lagged by 1
+        stop_list = np.copy(done_list)
+        if done:
             break
     return game_rewards
 

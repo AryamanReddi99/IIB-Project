@@ -251,8 +251,8 @@ class _PosConfig:
         crossing horizontal parallel pathways, 2 agents
         """
         y = self.size / 2
-        agent_1 = np.array([1, y])
-        agent_2 = np.array([self.size - 2, y])
+        agent_1 = np.array([0, y])
+        agent_2 = np.array([self.size - 1, y])
         target_1 = create_wall("right", self.size)
         target_2 = create_wall("left", self.size)
         return {"agents": [agent_1, agent_2], "targets": [target_1, target_2]}
@@ -264,8 +264,8 @@ class _PosConfig:
         """
         x = self.size / 2
         y = self.size / 2
-        agent_1 = np.array([1, y - 1])
-        agent_2 = np.array([x, self.size - 2])
+        agent_1 = np.array([0, y - 1])
+        agent_2 = np.array([x, self.size - 1])
         target_1 = create_wall("right", self.size)
         target_2 = create_wall("bottom", self.size)
         return {"agents": [agent_1, agent_2], "targets": [target_1, target_2]}
@@ -275,8 +275,8 @@ class _PosConfig:
         crossing vertical parallel pathways, 2 agents
         """
         x = self.size / 2
-        agent_1 = np.array([x, self.size - 2])
-        agent_2 = np.array([x, 1])
+        agent_1 = np.array([x, self.size - 1])
+        agent_2 = np.array([x, 0])
         target_1 = create_wall("bottom", self.size)
         target_2 = create_wall("top", self.size)
         return {"agents": [agent_1, agent_2], "targets": [target_1, target_2]}
@@ -288,8 +288,8 @@ class _PosConfig:
         """
         x = self.size / 2
         y = self.size / 2
-        agent_1 = np.array([x, 1])
-        agent_2 = np.array([self.size - 2, y])
+        agent_1 = np.array([x, 0])
+        agent_2 = np.array([self.size - 1, y])
         target_1 = create_wall("top", self.size)
         target_2 = create_wall("left", self.size)
         return {"agents": [agent_1, agent_2], "targets": [target_1, target_2]}
@@ -301,8 +301,8 @@ class _PosConfig:
         """
         x = self.size / 2
         y = self.size / 2
-        agent_1 = np.array([1, y - 1])
-        agent_2 = np.array([x, 1])
+        agent_1 = np.array([0, y])
+        agent_2 = np.array([x, 0])
         target_1 = create_wall("right", self.size)
         target_2 = create_wall("top", self.size)
         return {"agents": [agent_1, agent_2], "targets": [target_1, target_2]}

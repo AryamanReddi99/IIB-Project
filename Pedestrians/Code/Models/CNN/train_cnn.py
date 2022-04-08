@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 from tqdm import tqdm
+import keras.backend as K
 
 # Import pkg
 sep = os.path.sep  # system path seperator
@@ -33,21 +34,29 @@ store_model_fn = (
     + datetime.datetime.now().strftime("-%d-%m-%y_%H-%M")
     + f"{sep}Model"
 )
+store_config_fn = store_model_fn + "_config.txt"
+store_img_fn = (
+    f"..{sep}Saved{sep}"
+    + fn
+    + datetime.datetime.now().strftime("-%d-%m-%y_%H-%M")
+    + f"{sep}"
+)
 load_model_fn = ""
 
 # Storage Triggers
-store_img = False
+store_img = True
+store_config = True
 store_model = True
 load_model = False
 
 # Define Configs
 screenconfig = ScreenConfig(headless=False, border_size=1)
 gameconfig = GameConfig(
-    env_size=64,
+    env_size=8,
     config=11,
-    speed=8,
+    speed=1,
     num_agents=2,
-    agent_size=8,
+    agent_size=1,
     channels=4,
     num_actions=5,
     games=100,
@@ -56,7 +65,7 @@ gameconfig = GameConfig(
 )
 nn_config = NNConfig(
     mode="training",
-    gamma=0.9,
+    gamma=0.7,
     mem_max_size=2000,
     minibatch_size=32,
     epoch_size=32,
@@ -65,7 +74,7 @@ nn_config = NNConfig(
     min_epsilon=0.01,
     learning_rate=0.0001,
     tensorboard=False,
-    target_model_iter=10,
+    target_model_iter=100,
 )
 
 # Create Functional Classes
@@ -86,6 +95,9 @@ rewards_mock = [
     [] for _ in range(gameconfig.num_agents)
 ]  # mock environment rewards for each episode
 learning_rate = []  # learning rate of cnn over time
+best_cumulative_reward = (
+    -100
+)  # the score to beat for a model to get saved after winning
 move_total = 0
 
 # Begin Training
@@ -197,26 +209,38 @@ for game in tqdm(range(gameconfig.games)):
 
         # Stop list is done list lagged by 1
         stop_list = np.copy(done_list)
-        if done or move == gameconfig.max_game_length - 1:
+        if done:
             if not screenconfig.headless:
                 time.sleep(0.2)
             break
-    
+
     ## Diagnostics
     # Mock environment
-    
+    game_rewards_mock = mock_game_cnn(cnn, mock_env)
+
+    # Rewards
     for agent in range(gameconfig.num_agents):
         rewards[agent].append(game_rewards[agent])
+        rewards_mock[agent].append(game_rewards_mock[agent])
 
-    # Save models where both agents reach targets
-    if all(env.reached_list) and store_model:
+    # Save models where both agents reach targets and new mock reward highscore reached
+    game_total_reward_mock = sum(
+        [sum(agent_mock_rewards) for agent_mock_rewards in game_rewards_mock]
+    )
+    if (
+        all(env.reached_list)
+        and (game_total_reward_mock > best_cumulative_reward)
+        and store_model
+    ):
+        best_cumulative_reward = game_total_reward_mock
         cnn.model.save(store_model_fn + f"_game_{game}")
         print(f"Model saved at {store_model_fn}")
 
-# Store Final Model
+# Store Final Model and Configs
 if store_model:
     cnn.model.save(store_model_fn + f"_latest")
     cnn.model.save(store_latest_model_fn)
+    write_training_details(gameconfig, nn_config, store_config_fn)
     print(f"Model saved at {store_model_fn}_latest \nand\n{store_latest_model_fn}")
 
 # Diagnostics Post-Processing
@@ -224,6 +248,14 @@ total_rewards = [
     [round(sum(rewards[agent][game]), 2) for game in range(gameconfig.games)]
     for agent in range(gameconfig.num_agents)
 ]  # for each agent, get a list of the total reward at the end of each game
+total_rewards_mock = [
+    [round(sum(rewards_mock[agent][game]), 2) for game in range(gameconfig.games)]
+    for agent in range(gameconfig.num_agents)
+]  # for each agent, get a list of the total mock reward at the end of each game
+
+# Save Score Charts
+plot_scores(total_rewards, store_img_fn + f"scores.jpg")
+plot_scores(total_rewards_mock, store_img_fn + f"scores_mock.jpg")
 
 
 print("Finished")
