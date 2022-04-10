@@ -3,9 +3,9 @@
 ## Imports
 import os
 import sys
-import time
-import pprint
-import datetime
+from time import sleep
+from pprint import PrettyPrinter
+from datetime import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
@@ -23,7 +23,7 @@ from pkg.window import *
 from pkg.diagnostics import *
 
 # Pretty Printer
-pp = pprint.PrettyPrinter(indent=4)
+pp = PrettyPrinter(indent=4)
 
 # Data Paths
 fn = Path(__file__).stem  # this filename
@@ -31,15 +31,12 @@ store_latest_model_fn = f"..{sep}Saved{sep}Latest"
 store_model_fn = (
     f"..{sep}Saved{sep}"
     + fn
-    + datetime.datetime.now().strftime("-%d-%m-%y_%H-%M")
+    + datetime.now().strftime("-%d-%m-%y_%H-%M")
     + f"{sep}Model"
 )
 store_config_fn = store_model_fn + "_config.txt"
 store_img_fn = (
-    f"..{sep}Saved{sep}"
-    + fn
-    + datetime.datetime.now().strftime("-%d-%m-%y_%H-%M")
-    + f"{sep}"
+    f"..{sep}Saved{sep}" + fn + datetime.now().strftime("-%d-%m-%y_%H-%M") + f"{sep}"
 )
 load_model_fn = ""
 
@@ -72,7 +69,7 @@ nn_config = NNConfig(
     frac_random=0.3,
     final_epsilon=0.01,
     min_epsilon=0.01,
-    learning_rate=0.0001,
+    learning_rate=0.00001,
     tensorboard=False,
     target_model_iter=100,
 )
@@ -95,9 +92,7 @@ rewards_mock = [
     [] for _ in range(gameconfig.num_agents)
 ]  # mock environment rewards for each episode
 learning_rate = []  # learning rate of cnn over time
-best_cumulative_reward = (
-    -100
-)  # the score to beat for a model to get saved after winning
+best_cumulative_reward = -100  # score required for a model to get saved
 move_total = 0
 
 # Begin Training
@@ -148,13 +143,13 @@ for game in tqdm(range(gameconfig.games)):
     ]  # rewards for all agents for one game
 
     # Play Game
-    for move in range(0, gameconfig.max_game_length):
+    for move in range(1, gameconfig.max_game_length + 1):
 
         # Get CNN Actions
         action_list = cnn.act(game, done_list)
 
         # For testing collisions/targets
-        # action_list = [1,2]
+        # action_list = [4, 2]
 
         # Take Actions
         (
@@ -207,11 +202,14 @@ for game in tqdm(range(gameconfig.games)):
         # Update total moves
         move_total += 1
 
+        ## Model Diagnostics
+        learning_rate.append(K.eval(cnn.model.optimizer.lr))
+
         # Stop list is done list lagged by 1
         stop_list = np.copy(done_list)
         if done:
             if not screenconfig.headless:
-                time.sleep(0.2)
+                sleep(0.2)
             break
 
     ## Diagnostics
@@ -253,9 +251,18 @@ total_rewards_mock = [
     for agent in range(gameconfig.num_agents)
 ]  # for each agent, get a list of the total mock reward at the end of each game
 
-# Save Score Charts
+## Save Diagnostics
+# Score Charts
 plot_scores(total_rewards, store_img_fn + f"scores.jpg")
 plot_scores(total_rewards_mock, store_img_fn + f"scores_mock.jpg")
 
+# Model Learning Rate
+plot_single_attribute(
+    data=learning_rate,
+    fn=store_img_fn + f"learning_rate.jpg",
+    xlabel="Move",
+    ylabel="CNN Learning Rate",
+    title="CNN Learning Rate During Training",
+)
 
 print("Finished")

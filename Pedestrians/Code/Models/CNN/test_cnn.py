@@ -23,8 +23,8 @@ from pkg.window import *
 pp = pprint.PrettyPrinter(indent=4)
 
 # Data Paths
-# load_model_fn = "../Saved/train_cnn-31-03-22_18-29/Model_game_95"
-load_model_fn = "../Saved/Latest"
+load_model_fn = "../Saved/train_cnn-10-04-22_02-57/Model_game_79"
+# load_model_fn = "../Saved/Latest"
 
 # Storage Triggers
 store_img = False

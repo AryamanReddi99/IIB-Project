@@ -1,9 +1,8 @@
 # For collecting diagnostic information about runs
 import seaborn as sns
 import matplotlib.pyplot as plt
-
 from .general import *
-from .dqn import NNConfig
+from .dqn import *
 
 sns.set_theme()
 
@@ -53,6 +52,21 @@ def plot_scores(scores, fn):
     plt.xlabel("Game")
     plt.ylabel("Cumulative Reward")
     plt.title("Agent Scores during Training")
+    plt.legend()
+    fig.savefig(fn)
+
+
+def plot_single_attribute(data, fn, xlabel, ylabel, title):
+    """
+    Plot a single attribute (e.g. model learning rate) over the course of training
+    """
+    data_len = len(data)
+    x = np.arange(data_len)
+    fig = plt.figure()
+    plt.plot(x, data)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
     fig.savefig(fn)
 
 

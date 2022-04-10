@@ -1,6 +1,6 @@
-import collections
-import random
-import datetime
+from collections import deque, namedtuple
+from random import randint, uniform
+from datetime import datetime
 import numpy as np
 from tensorflow.keras.optimizers import Adam
 from keras.models import Sequential, load_model
@@ -54,16 +54,16 @@ class CNN:
 
         ## Buffers
         # stores last 2 sets of agent positions
-        self.agent_pos_buffer = collections.deque(maxlen=2)
+        self.agent_pos_buffer = deque(maxlen=2)
         # stores target positions
-        self.target_pos_buffer = collections.deque(maxlen=1)
+        self.target_pos_buffer = deque(maxlen=1)
         # stores last 2 sets of model-readable states
-        self.state_buffer = collections.deque(maxlen=2)
+        self.state_buffer = deque(maxlen=2)
         # stores experiences
-        self.replay_buffer = collections.deque(maxlen=nn_config.mem_max_size)
+        self.replay_buffer = deque(maxlen=nn_config.mem_max_size)
 
         # Tensorboard
-        log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        log_dir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
         self.tensorboard_callback = TensorBoard(log_dir, histogram_freq=1)
 
         # Metrics
@@ -115,7 +115,7 @@ class CNN:
             if done_list[agent]:
                 action = 0  # stop moving
             # explore
-            elif random.uniform(0, 1) < self._get_epsilon(game):
+            elif uniform(0, 1) < self._get_epsilon(game):
                 action = self._action_space_sample()
             # exploit
             else:
@@ -170,13 +170,13 @@ class CNN:
         )
 
         # Max Pooling 1
-        model.add(MaxPooling2D(pool_size=(2, 2)))
+        # model.add(MaxPooling2D(pool_size=(2, 2)))
 
         # Conv 2
         model.add(Conv2D(64, (3, 3), padding="same", activation="relu"))
 
         # Max Pooling 2
-        model.add(MaxPooling2D(pool_size=(2, 2)))
+        # model.add(MaxPooling2D(pool_size=(2, 2)))
 
         # Flatten
         model.add(Flatten())
@@ -188,7 +188,7 @@ class CNN:
         model.add(Dense(128, activation="relu"))
 
         # Dense 2
-        model.add(Dense(64, activation="relu"))
+        # model.add(Dense(64, activation="relu"))
 
         # output
         model.add(Dense(self.num_actions))
@@ -323,7 +323,7 @@ class CNN:
         """
         Choose a random move
         """
-        return random.randint(0, self.num_actions - 1)
+        return randint(0, self.num_actions - 1)
 
 
 class NNConfig:
@@ -367,7 +367,7 @@ class NNConfig:
 ################################# External Functions/Classes ##############################
 
 # Tuple class which contains details of an experience
-Experience = collections.namedtuple(
+Experience = namedtuple(
     "Experience", field_names=["state", "action", "reward", "new_state", "done"]
 )
 
