@@ -1,5 +1,7 @@
-import numpy as np
 from random import randint
+
+import numpy as np
+
 from .general import *
 
 
@@ -30,8 +32,8 @@ class PedEnv:
         self.done = 0
         self.reward_death = -1
         self.reward_target = +1
-        self.reward_stat = -0.05
-        self.reward_move = -0.05
+        self.reward_stat = -0.01
+        self.reward_move = -0.01
 
     def _check_collision_ball(self, pos1, pos2):
         """

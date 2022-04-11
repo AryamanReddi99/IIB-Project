@@ -8,19 +8,20 @@ sep = os.path.sep  # system path seperator
 sys.path.append("/mnt/c/Users/Red/Desktop/Coding/Projects/IIB-Project/Pedestrians/venv")
 os.chdir(os.path.dirname(__file__).replace(sep, sep))  # change to cwd
 
+import datetime
 # Imports
 import os
-import time
 import pprint
-import datetime
-import numpy as np
-import matplotlib.pyplot as plt
+import time
 from pathlib import Path
-from tqdm import tqdm
-from pkg.general import *
-from pkg.env import *
+
+import matplotlib.pyplot as plt
+import numpy as np
 from pkg.dqn import *
+from pkg.env import *
+from pkg.general import *
 from pkg.window import *
+from tqdm import tqdm
 
 # Debugging
 pp = pprint.PrettyPrinter(indent=4)

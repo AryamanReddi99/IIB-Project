@@ -2,28 +2,29 @@
 
 ## Imports
 import os
+import pprint
 import sys
 import time
-import pprint
-import numpy as np
-import matplotlib.pyplot as plt
 from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
 from tqdm import tqdm
 
 # Import pkg
 sep = os.path.sep  # system path seperator
 sys.path.append("/mnt/c/Users/Red/Desktop/Coding/Projects/IIB-Project/Pedestrians/venv")
 os.chdir(os.path.dirname(__file__).replace(sep, sep))  # change to cwd
-from pkg.general import *
-from pkg.env import *
 from pkg.dqn import *
+from pkg.env import *
+from pkg.general import *
 from pkg.window import *
 
 # Pretty Printer
 pp = pprint.PrettyPrinter(indent=4)
 
 # Data Paths
-load_model_fn = "../Saved/train_cnn-10-04-22_02-57/Model_game_79"
+load_model_fn = "../Saved/train_cnn-10-04-22_18-26/train_cnn-10-04-22_18-26/Model_game_381"
 # load_model_fn = "../Saved/Latest"
 
 # Storage Triggers

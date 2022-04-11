@@ -1,16 +1,13 @@
 from collections import deque, namedtuple
-from random import randint, uniform
 from datetime import datetime
+from random import randint, uniform
+
 import numpy as np
-from tensorflow.keras.optimizers import Adam
+from keras.layers import Conv2D, Dense, Flatten, MaxPooling2D
 from keras.models import Sequential, load_model
-from keras.layers import (
-    Dense,
-    Flatten,
-    Conv2D,
-    MaxPooling2D,
-)
 from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.keras.optimizers import Adam
+
 from .general import *
 
 ################################# Main classes ##############################
@@ -57,6 +54,8 @@ class CNN:
         self.agent_pos_buffer = deque(maxlen=2)
         # stores target positions
         self.target_pos_buffer = deque(maxlen=1)
+        # stores anti-target positions
+        self.anti_target_pos_buffer = deque(maxlen=1)
         # stores last 2 sets of model-readable states
         self.state_buffer = deque(maxlen=2)
         # stores experiences
@@ -99,6 +98,13 @@ class CNN:
             for target, pos in enumerate(target_pos):
                 target_pos_data[target] = float2mat(pos, self.env_size)
             self.target_pos_buffer.append(target_pos_data)
+
+        # Anti-Targets
+        if len(self.anti_target_pos_buffer) == 0:
+            anti_target_pos_data = [None for _ in range(self.num_agents)]
+            for anti_target, pos in enumerate(target_pos):
+                anti_target_pos_data[anti_target] = float2mat_anti_target(pos, self.env_size)
+            self.anti_target_pos_buffer.append(anti_target_pos_data)
 
         # Update states
         if len(self.agent_pos_buffer) > 1:
@@ -208,14 +214,16 @@ class CNN:
         """
         states = [None for _ in range(self.num_agents)]  # [None, None]
         for agent in range(self.num_agents):
-            # agent needs current pos, target pos, current + previous pos for each opponent
-            agent_input = [None for _ in range(2 + ((self.num_agents - 1) * 2))]
+            # agent needs current pos, target pos, current + previous pos for each opponent, anti-target pos
+            agent_input = [None for _ in range(3 + ((self.num_agents - 1) * 2))]
             # agent's current position
             agent_input[0] = self.agent_pos_buffer[-1][agent]
             # agent's target position
             agent_input[1] = self.target_pos_buffer[-1][agent]
+            # agent's anti-target position
+            agent_input[2] = self.anti_target_pos_buffer[-1][agent]
             # opponent positions
-            insert_position = 2
+            insert_position = 3
             for other_agent in range(self.num_agents):
                 if agent != other_agent:
                     agent_input[insert_position] = self.agent_pos_buffer[-1][

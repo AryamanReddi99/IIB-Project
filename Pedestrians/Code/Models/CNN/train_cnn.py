@@ -3,24 +3,25 @@
 ## Imports
 import os
 import sys
-from time import sleep
-from pprint import PrettyPrinter
 from datetime import datetime
-import numpy as np
-import matplotlib.pyplot as plt
 from pathlib import Path
-from tqdm import tqdm
+from pprint import PrettyPrinter
+from time import sleep
+
 import keras.backend as K
+import matplotlib.pyplot as plt
+import numpy as np
+from tqdm import tqdm
 
 # Import pkg
 sep = os.path.sep  # system path seperator
 sys.path.append("/mnt/c/Users/Red/Desktop/Coding/Projects/IIB-Project/Pedestrians/venv")
 os.chdir(os.path.dirname(__file__).replace(sep, sep))  # change to cwd
-from pkg.general import *
-from pkg.env import *
-from pkg.dqn import *
-from pkg.window import *
 from pkg.diagnostics import *
+from pkg.dqn import *
+from pkg.env import *
+from pkg.general import *
+from pkg.window import *
 
 # Pretty Printer
 pp = PrettyPrinter(indent=4)
@@ -54,7 +55,7 @@ gameconfig = GameConfig(
     speed=1,
     num_agents=2,
     agent_size=1,
-    channels=4,
+    channels=5,
     num_actions=5,
     games=100,
     max_game_length=50,

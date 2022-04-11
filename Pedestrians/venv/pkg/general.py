@@ -1,6 +1,7 @@
-import numpy as np
-from random import randint
 from collections import OrderedDict
+from random import randint
+
+import numpy as np
 
 
 def bound(low, high, value):
@@ -35,6 +36,17 @@ def float2mat(pos, size):
             mat[size - 1 - y, x] = 1
     return mat
 
+def float2mat_anti_target(pos, size):
+    """
+    Converts a wall float position array into an anti-target (the opposing walls)
+    """
+    anti_target_walls = ["top", "bottom", "left", "right"]
+    target_wall = which_wall(pos)
+    anti_target_walls.remove(target_wall)
+    mat = np.zeros([size, size])
+    for wall in anti_target_walls:
+        mat += float2mat(create_wall(wall, size), size)
+    return np.clip(mat, a_min=0, a_max=1)
 
 def mat2float(arr):
     """
@@ -44,8 +56,14 @@ def mat2float(arr):
     indices = np.argwhere(arr)  # indices of non-zero points
     flipped_indices = np.flip(indices, axis=1)  # flip x and y coords
     if len(flipped_indices) > 1:
-        # wall
-        flipped_indices[:, 1] = (
+        # wall or walls
+        if len(flipped_indices) > env_size:
+            # walls
+            # just return nothing, don't need it yet
+            return
+        else:
+            # wall
+            flipped_indices[:, 1] = (
             env_size - 1 - flipped_indices[:, 1]
         )  # flip y about centre
         return flipped_indices
@@ -56,7 +74,6 @@ def mat2float(arr):
     else:
         # not on grid
         return np.array([-1, -1]).astype(int)
-
 
 def float2pygame(pos, size):
     """
@@ -138,7 +155,7 @@ def create_wall(wall, size):
         wall = [np.array([size - 1, i]) for i in range(0, size)]
     else:
         raise ValueError("Incorrect argument for wall")
-    return wall
+    return np.array(wall)
 
 
 def pretty_state(state):
