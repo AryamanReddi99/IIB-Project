@@ -33,7 +33,7 @@ class CNN:
         self.num_agents = gameconfig.num_agents
         self.channels = gameconfig.channels
         self.num_actions = gameconfig.num_actions
-        self.games = gameconfig.games
+        self.episodes = gameconfig.episodes
 
         ## nn_config
         self.mode = nn_config.mode
@@ -103,7 +103,9 @@ class CNN:
         if len(self.anti_target_pos_buffer) == 0:
             anti_target_pos_data = [None for _ in range(self.num_agents)]
             for anti_target, pos in enumerate(target_pos):
-                anti_target_pos_data[anti_target] = float2mat_anti_target(pos, self.env_size)
+                anti_target_pos_data[anti_target] = float2mat_anti_target(
+                    pos, self.env_size
+                )
             self.anti_target_pos_buffer.append(anti_target_pos_data)
 
         # Update states
@@ -303,12 +305,12 @@ class CNN:
     def _get_epsilon(self, game):
         """
         Returns epsilon (random move chance) as decaying e^-x with first
-        frac_random*games totally random
+        frac_random*episodes totally random
 
         game = current game number
-        games = number of total games
-        frac_random = fraction of games with epsilon = 1
-        final_epsilon = epsilon after all games have been played
+        episodes = number of total episodes
+        frac_random = fraction of episodes with epsilon = 1
+        final_epsilon = epsilon after all episodes have been played
         min_epsilon = minimum val of epsilon
 
         Use game=-1 to put it in testing mode
@@ -321,8 +323,8 @@ class CNN:
                 1,
                 self.final_epsilon
                 ** (
-                    (game - self.frac_random * self.games)
-                    / (self.games * (1 - self.frac_random))
+                    (game - self.frac_random * self.episodes)
+                    / (self.episodes * (1 - self.frac_random))
                 ),
             )
         return self.epsilon
@@ -389,7 +391,7 @@ def main():
         agent_size=8,
         channels=4,
         num_actions=5,
-        games=100,
+        episodes=100,
     )
     nn_config = NNConfig(
         mode="training",

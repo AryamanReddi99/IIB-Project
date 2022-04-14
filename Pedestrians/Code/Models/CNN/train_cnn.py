@@ -57,8 +57,8 @@ gameconfig = GameConfig(
     agent_size=1,
     channels=5,
     num_actions=5,
-    games=100,
-    max_game_length=50,
+    episodes=100,
+    max_episode_length=50,
     doom=False,
 )
 nn_config = NNConfig(
@@ -97,7 +97,7 @@ best_cumulative_reward = -100  # score required for a model to get saved
 move_total = 0
 
 # Begin Training
-for game in tqdm(range(gameconfig.games)):
+for game in tqdm(range(gameconfig.episodes)):
 
     # Reset Board
     stop_list = [
@@ -144,7 +144,7 @@ for game in tqdm(range(gameconfig.games)):
     ]  # rewards for all agents for one game
 
     # Play Game
-    for move in range(1, gameconfig.max_game_length + 1):
+    for move in range(1, gameconfig.max_episode_length + 1):
 
         # Get CNN Actions
         action_list = cnn.act(game, done_list)
@@ -244,11 +244,11 @@ if store_model:
 
 # Diagnostics Post-Processing
 total_rewards = [
-    [round(sum(rewards[agent][game]), 2) for game in range(gameconfig.games)]
+    [round(sum(rewards[agent][game]), 2) for game in range(gameconfig.episodes)]
     for agent in range(gameconfig.num_agents)
 ]  # for each agent, get a list of the total reward at the end of each game
 total_rewards_mock = [
-    [round(sum(rewards_mock[agent][game]), 2) for game in range(gameconfig.games)]
+    [round(sum(rewards_mock[agent][game]), 2) for game in range(gameconfig.episodes)]
     for agent in range(gameconfig.num_agents)
 ]  # for each agent, get a list of the total mock reward at the end of each game
 

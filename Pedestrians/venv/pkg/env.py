@@ -26,14 +26,14 @@ class PedEnv:
         self.num_agents = gameconfig.num_agents
         self.agent_size = gameconfig.agent_size
         self.num_actions = gameconfig.num_actions
-        self.max_game_length = gameconfig.max_game_length
-
-        # env params
-        self.done = 0
-        self.reward_death = -1
-        self.reward_target = +1
-        self.reward_stat = -0.01
+        self.max_episode_length = gameconfig.max_episode_length
+        self.reward_target = gameconfig.reward_target
+        self.reward_death = gameconfig.reward_death
+        self.reward_stat = gameconfig.reward_stat
         self.reward_move = -0.01
+
+        # episode params
+        self.done = 0
 
     def _check_collision_ball(self, pos1, pos2):
         """

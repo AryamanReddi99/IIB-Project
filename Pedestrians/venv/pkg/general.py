@@ -36,6 +36,7 @@ def float2mat(pos, size):
             mat[size - 1 - y, x] = 1
     return mat
 
+
 def float2mat_anti_target(pos, size):
     """
     Converts a wall float position array into an anti-target (the opposing walls)
@@ -47,6 +48,7 @@ def float2mat_anti_target(pos, size):
     for wall in anti_target_walls:
         mat += float2mat(create_wall(wall, size), size)
     return np.clip(mat, a_min=0, a_max=1)
+
 
 def mat2float(arr):
     """
@@ -64,8 +66,8 @@ def mat2float(arr):
         else:
             # wall
             flipped_indices[:, 1] = (
-            env_size - 1 - flipped_indices[:, 1]
-        )  # flip y about centre
+                env_size - 1 - flipped_indices[:, 1]
+            )  # flip y about centre
         return flipped_indices
     elif len(flipped_indices) == 1:
         # point
@@ -74,6 +76,7 @@ def mat2float(arr):
     else:
         # not on grid
         return np.array([-1, -1]).astype(int)
+
 
 def float2pygame(pos, size):
     """
@@ -352,8 +355,11 @@ class GameConfig:
         agent_size=8,
         channels=4,
         num_actions=5,
-        games=100,
-        max_game_length=50,
+        episodes=100,
+        max_episode_length=50,
+        reward_target=1,
+        reward_death=-1,
+        reward_move=-0.05,
         doom=False,
     ):
 
@@ -369,14 +375,17 @@ class GameConfig:
         self.agent_size = agent_size
         self.channels = channels
         self.num_actions = num_actions
-        self.games = games
-        self.max_game_length = max_game_length
-
-        # Assertions
-        assert self.speed <= 2 * np.sqrt(2) * self.agent_size
+        self.episodes = episodes
+        self.max_episode_length = max_episode_length
+        self.reward_target=reward_target
+        self.reward_death=reward_death
+        self.reward_move=reward_move
 
         # Doom
         self.doom = doom
+
+        # Assertions
+        assert self.speed <= 2 * np.sqrt(2) * self.agent_size
 
 
 ####################################### main() ####################################

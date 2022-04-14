@@ -24,7 +24,9 @@ from pkg.window import *
 pp = pprint.PrettyPrinter(indent=4)
 
 # Data Paths
-load_model_fn = "../Saved/train_cnn-10-04-22_18-26/train_cnn-10-04-22_18-26/Model_game_381"
+load_model_fn = (
+    "../Saved/train_cnn-10-04-22_18-26/train_cnn-10-04-22_18-26/Model_game_381"
+)
 # load_model_fn = "../Saved/Latest"
 
 # Storage Triggers
@@ -46,7 +48,7 @@ gameconfig = GameConfig(
     agent_size=1,
     channels=4,
     num_actions=5,
-    games=100,
+    episodes=100,
     doom=False,
 )
 nn_config = NNConfig(
@@ -72,13 +74,13 @@ cnn = CNN(gameconfig, nn_config)
 cnn.load_cnn(load_model_fn)
 
 # Game Parameters
-max_game_length = 50
+max_episode_length = 50
 
 ### Diagnostics
 total_rewards = []
 
 # Begin Testing
-for game in tqdm(range(gameconfig.games)):
+for game in tqdm(range(gameconfig.episodes)):
     # Reset Board
     stop_list = [
         False for _ in range(gameconfig.num_agents)
@@ -122,7 +124,7 @@ for game in tqdm(range(gameconfig.games)):
     total_reward = 0
 
     # Play Game
-    for move in range(1, max_game_length):
+    for move in range(1, max_episode_length):
 
         # Get CNN Actions
         action_list = cnn.act(game, done_list)
@@ -176,7 +178,7 @@ for game in tqdm(range(gameconfig.games)):
 
         # Update stop_list, check if done:
         stop_list = np.copy(done_list)
-        if done or move == max_game_length - 1:
+        if done or move == max_episode_length - 1:
             total_rewards.append(round(total_reward, 2))
             time.sleep(1)
             break

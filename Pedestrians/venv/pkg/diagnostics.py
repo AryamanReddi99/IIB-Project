@@ -39,16 +39,16 @@ def write_training_details(gameconfig, nn_config, fn):
 
 def plot_scores(scores, fn):
     """
-    Plot and save fig of the scores (cumulative rewards) of the model agents over a number of games
+    Plot and save fig of the scores (cumulative rewards) of the model agents over a number of episodes
     """
     # Assert all lists are same length
     assert len({len(agent_scores) for agent_scores in scores}) == 1
 
     # Plot
-    games = np.arange(1, len(scores[0]) + 1)
+    episodes = np.arange(1, len(scores[0]) + 1)
     fig = plt.figure()
     for agent, agent_scores in enumerate(scores):
-        plt.plot(games, agent_scores, label=f"Agent {agent}")
+        plt.plot(episodes, agent_scores, label=f"Agent {agent}")
     plt.xlabel("Game")
     plt.ylabel("Cumulative Reward")
     plt.title("Agent Scores during Training")
@@ -91,7 +91,7 @@ def mock_game_cnn(cnn, mock_env):
     game_rewards = [[] for _ in range(mock_env.num_agents)]
 
     # Play Game
-    for move in range(0, mock_env.max_game_length):
+    for move in range(0, mock_env.max_episode_length):
 
         # Get CNN Actions
         action_list = cnn.act(game=-1, done_list=done_list)
@@ -134,7 +134,7 @@ def main():
         agent_size=8,
         channels=4,
         num_actions=5,
-        games=100,
+        episodes=100,
     )
     nn_config = NNConfig(
         mode="training",

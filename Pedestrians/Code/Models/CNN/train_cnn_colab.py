@@ -9,6 +9,7 @@ sys.path.append("/mnt/c/Users/Red/Desktop/Coding/Projects/IIB-Project/Pedestrian
 os.chdir(os.path.dirname(__file__).replace(sep, sep))  # change to cwd
 
 import datetime
+
 # Imports
 import os
 import pprint
@@ -54,7 +55,7 @@ args = sys.argv
     agent_size,
     channels,
     num_actions,
-    games,
+    episodes,
     doom,
     mode,
     gamma,
@@ -79,7 +80,7 @@ gameconfig = GameConfig(
     agent_size=int(agent_size),
     channels=int(channels),
     num_actions=int(num_actions),
-    games=int(games),
+    episodes=int(episodes),
     doom=int(doom),
 )
 
@@ -109,14 +110,14 @@ else:
     cnn.create_cnn()
 
 # Game Parameters
-max_game_length = 50
+max_episode_length = 50
 
 ### Diagnostics
 rewards = [[] for _ in range(gameconfig.num_agents)]
 move_total = 0
 
 # Begin Training
-for game in tqdm(range(gameconfig.games)):
+for game in tqdm(range(gameconfig.episodes)):
     # Reset Board
     stop_list = [
         False for _ in range(gameconfig.num_agents)
@@ -160,7 +161,7 @@ for game in tqdm(range(gameconfig.games)):
     game_rewards = [[] for _ in range(gameconfig.num_agents)]  # rewards for agents
 
     # Play Game
-    for move in range(0, max_game_length):
+    for move in range(0, max_episode_length):
 
         # Get CNN Actions
         action_list = cnn.act(game, done_list)
@@ -224,7 +225,7 @@ for game in tqdm(range(gameconfig.games)):
 
         # Stop list is done list lagged by 1
         stop_list = np.copy(done_list)
-        if done or move == max_game_length - 1:
+        if done or move == max_episode_length - 1:
             if not screenconfig.headless:
                 time.sleep(0.2)
             break

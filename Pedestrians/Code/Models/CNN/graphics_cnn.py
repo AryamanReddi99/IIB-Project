@@ -49,7 +49,7 @@ gameconfig = GameConfig(
     agent_size=16,
     channels=4,
     num_actions=5,
-    games=100,
+    episodes=100,
     doom=False,
 )
 nn_config = NNConfig(
@@ -71,7 +71,7 @@ window = Window(screenconfig, gameconfig)
 env = PedEnv(gameconfig)
 
 # Game Parameters
-max_game_length = 100000
+max_episode_length = 100000
 
 ### Movement
 # Programmed movements, on 256x256 grid, 32 agent size, speed 8
@@ -146,18 +146,18 @@ for el in actions_agent_2:
     actions_agent_2_smooth.append(el)
 
 # Extend to fill up total game length
-actions_agent_1_smooth.extend([0] * (max_game_length - len(actions_agent_1_smooth)))
-actions_agent_2_smooth.extend([0] * (max_game_length - len(actions_agent_2_smooth)))
+actions_agent_1_smooth.extend([0] * (max_episode_length - len(actions_agent_1_smooth)))
+actions_agent_2_smooth.extend([0] * (max_episode_length - len(actions_agent_2_smooth)))
 actions = [
     (actions_agent_1_smooth[step], actions_agent_2_smooth[step])
-    for step in range(max_game_length)
+    for step in range(max_episode_length)
 ]
 
 ### Diagnostics
 move_total = 0
 
 # Begin Training
-for game in tqdm(range(gameconfig.games)):
+for game in tqdm(range(gameconfig.episodes)):
     # Reset Board
     stop_list = [
         False for _ in range(gameconfig.num_agents)
@@ -206,7 +206,7 @@ for game in tqdm(range(gameconfig.games)):
     time.sleep(0.7)
 
     # Play Game
-    for move in range(0, max_game_length):
+    for move in range(0, max_episode_length):
 
         # Get CNN Actions
         # action_list = cnn.act(game, done_list)
@@ -273,7 +273,7 @@ for game in tqdm(range(gameconfig.games)):
 
         # Stop list is done list lagged by 1
         stop_list = np.copy(done_list)
-        if done or move == max_game_length - 1:
+        if done or move == max_episode_length - 1:
             if not screenconfig.headless:
                 time.sleep(1)
             break
