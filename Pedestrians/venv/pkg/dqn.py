@@ -31,6 +31,7 @@ class CNN:
         ## gameconfig
         self.env_size = gameconfig.env_size
         self.num_agents = gameconfig.num_agents
+        self.agent_size = gameconfig.agent_size
         self.channels = gameconfig.channels
         self.num_actions = gameconfig.num_actions
         self.episodes = gameconfig.episodes
@@ -89,14 +90,14 @@ class CNN:
         # Agents
         agent_pos_data = [None for _ in range(self.num_agents)]
         for agent, pos in enumerate(agent_pos):
-            agent_pos_data[agent] = float2mat(pos, self.env_size)
+            agent_pos_data[agent] = float2mat_agent(pos, self.agent_size, self.env_size)
         self.agent_pos_buffer.append(agent_pos_data)
 
         # Targets
         if len(self.target_pos_buffer) == 0:
             target_pos_data = [None for _ in range(self.num_agents)]
             for target, pos in enumerate(target_pos):
-                target_pos_data[target] = float2mat(pos, self.env_size)
+                target_pos_data[target] = float2mat_target(pos, self.env_size)
             self.target_pos_buffer.append(target_pos_data)
 
         # Anti-Targets

@@ -50,15 +50,18 @@ load_model = False
 # Define Configs
 screenconfig = ScreenConfig(headless=False, border_size=1)
 gameconfig = GameConfig(
-    env_size=8,
+    env_size=16,
     config=11,
     speed=1,
     num_agents=2,
-    agent_size=1,
+    agent_size=3,
     channels=5,
     num_actions=5,
     episodes=100,
     max_episode_length=50,
+    reward_target=1,
+    reward_death=-1,
+    reward_move=-0.05,
     doom=False,
 )
 nn_config = NNConfig(
@@ -150,7 +153,7 @@ for game in tqdm(range(gameconfig.episodes)):
         action_list = cnn.act(game, done_list)
 
         # For testing collisions/targets
-        # action_list = [4, 2]
+        action_list = [4, 2]
 
         # Take Actions
         (

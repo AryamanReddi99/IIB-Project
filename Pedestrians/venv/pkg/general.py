@@ -2,6 +2,7 @@ from collections import OrderedDict
 from random import randint
 
 import numpy as np
+from raster_geometry import circle
 
 
 def bound(low, high, value):
@@ -10,43 +11,65 @@ def bound(low, high, value):
     """
     return max(low, min(high, value))
 
-
-def float2mat(pos, size):
+def float2mat_agent(pos, env_size, agent_size):
     """
-    Converts position in np.array x-y format into square matrix
+    Converts position in np.array x-y format into circlular shape in square matrix
     e.g. [0,0] in 2x2 grid -> [0 0]
                               [1 0]
     """
     if len(list(pos)) > 2:
-        # wall
-        mat = np.zeros([size, size])
+        raise Exception("Argument must be a single coordinate")
+    else:
+        try:
+            place_idx = env_size - 1
+            x = int(pos[0])
+            y = int(pos[1])
+        except:
+            raise TypeError("position must be integer")
+        # if outside bounds, all-0 matrix
+        if x >= 0 and x <= env_size - 1 and y >= 0 and y <= env_size - 1:
+            mat = circle(shape=env_size, radius = agent_size, position=[(env_size - 1 - y)/place_idx, x/place_idx]).astype('uint8')
+        else:
+            mat = np.zeros([env_size, env_size])
+    return mat
+
+
+def float2mat_target(pos, env_size):
+    """
+    Converts position in np.array x-y format into point in one-hot square matrix
+    e.g. [0,0] in 2x2 grid -> [0 0]
+                              [1 0]
+    """
+    if len(list(pos)) > 2:
+        # wall coordinates list+
+        mat = np.zeros([env_size, env_size])
         for wall_element in pos:
-            mat += float2mat(wall_element, size)
+            mat += float2mat_target(wall_element, env_size)
     else:
         # point
         try:
             x = int(pos[0])
             y = int(pos[1])
-            mat = np.zeros([size, size])
+            mat = np.zeros([env_size, env_size])
         except:
             raise TypeError("position must be integer")
 
         # if outside bounds, all-0 matrix
-        if x >= 0 and x <= size - 1 and y >= 0 and y <= size - 1:
-            mat[size - 1 - y, x] = 1
+        if x >= 0 and x <= env_size - 1 and y >= 0 and y <= env_size - 1:
+            mat[env_size - 1 - y, x] = 1
     return mat
 
 
-def float2mat_anti_target(pos, size):
+def float2mat_anti_target(pos, env_size):
     """
     Converts a wall float position array into an anti-target (the opposing walls)
     """
     anti_target_walls = ["top", "bottom", "left", "right"]
     target_wall = which_wall(pos)
     anti_target_walls.remove(target_wall)
-    mat = np.zeros([size, size])
+    mat = np.zeros([env_size, env_size])
     for wall in anti_target_walls:
-        mat += float2mat(create_wall(wall, size), size)
+        mat += float2mat_target(create_wall(wall, env_size), env_size)
     return np.clip(mat, a_min=0, a_max=1)
 
 

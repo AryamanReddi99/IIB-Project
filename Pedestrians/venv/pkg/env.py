@@ -29,17 +29,19 @@ class PedEnv:
         self.max_episode_length = gameconfig.max_episode_length
         self.reward_target = gameconfig.reward_target
         self.reward_death = gameconfig.reward_death
-        self.reward_stat = gameconfig.reward_stat
-        self.reward_move = -0.01
+        self.reward_move=gameconfig.reward_move
 
         # episode params
         self.done = 0
 
-    def _check_collision_ball(self, pos1, pos2):
+    def _check_collision_agents(self, pos1, pos2):
         """
-        check if agent has collided with agent or target
+        check if agents have collided
         """
-        if np.linalg.norm(pos1 - pos2) < 2 * self.agent_size:
+        pos1_mat = float2mat_agent(pos1, self.env_size, self.agent_size)
+        pos2_mat = float2mat_agent(pos2, self.env_size, self.agent_size)
+        # superpose agent images. If they overlap, they're in contact
+        if np.max(pos1_mat+pos2_mat) == 2:
             return True
         return False
 
@@ -83,7 +85,7 @@ class PedEnv:
         for agent1, posi in enumerate(self.agent_pos):
             for agent2, posj in enumerate(self.agent_pos):
                 if agent1 != agent2:
-                    if self._check_collision_ball(posi, posj):
+                    if self._check_collision_agents(posi, posj):
                         self.collided_list[agent1] = True
         return self.collided_list
 

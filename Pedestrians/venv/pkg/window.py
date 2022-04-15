@@ -1,11 +1,12 @@
 import os
-import time
 import random
+import time
+
 import pygame
 import pygame.freetype
-
 # from win32api import GetSystemMetrics
 from pygame.locals import *
+
 from .general import *
 
 
@@ -86,6 +87,9 @@ class Window:
             (0.5 * self.window_width, 0.5 * self.window_width)
         )
 
+        # arrays
+        self.agent_array = np.zeros((self.env_size, self.env_size, 3))
+
         # Doom
         self.doom = gameconfig.doom
         if self.doom:
@@ -122,11 +126,12 @@ class Window:
     def _draw_agents(self, display_info):
         """Draw agents on env_screen"""
         agent_pos = display_info.agent_pos
+        self.agent_array[:,:] = self.black
         if not self.doom:
             for agent, pos in enumerate(agent_pos):
-                pygame.draw.circle(
-                    self.env_screen, self.colours[agent], pos, self.agent_size
-                )
+                agent_pos_mat = float2mat_agent(pos, self.env_size, self.agent_size)
+                self.agent_array[agent_pos_mat>0] = self.colours[agent]
+            pygame.surfarray.blit_array(self.env_screen, self.agent_array)
         else:
             (caco_width, caco_height) = self.cacodemon_left.get_rect().size
             for agent, pos in enumerate(agent_pos):
@@ -413,17 +418,17 @@ class DisplayInfo:
 
 def main():
     gameconfig = GameConfig(
-        env_size=256,
+        env_size=8,
         config=1,
-        speed=8,
+        speed=1,
         num_agents=2,
-        agent_size=32,
+        agent_size=1,
         channels=4,
         num_actions=5,
     )
     screenconfig = ScreenConfig(
         headless=False,
-        border_size=10,
+        border_size=1,
         font_size=25,
         font="constantia",
         window_width=1000,
@@ -436,12 +441,12 @@ def main():
         i += 1
         agent_pos = [
             [
-                random.randint(0, gameconfig.env_size),
-                random.randint(0, gameconfig.env_size),
+                random.randint(0, gameconfig.env_size-1),
+                random.randint(0, gameconfig.env_size-1),
             ],
             [
-                random.randint(0, gameconfig.env_size),
-                random.randint(0, gameconfig.env_size),
+                random.randint(0, gameconfig.env_size-1),
+                random.randint(0, gameconfig.env_size-1),
             ],
         ]
         target_pos = [
