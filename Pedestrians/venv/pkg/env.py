@@ -183,7 +183,7 @@ class PedEnv:
                 self.reward_list[agent] = self.reward_target
                 self.done_list[agent] = True
             elif actions[agent] == 0:
-                self.reward_list[agent] = self.reward_stat
+                self.reward_list[agent] = self.reward_move
             else:
                 self.reward_list[agent] = self.reward_move
 

@@ -1,10 +1,9 @@
 # For collecting diagnostic information about runs
-import seaborn as sns
 import matplotlib.pyplot as plt
-from .general import *
-from .dqn import *
+import plotly.express as px
 
-sns.set_theme()
+from .dqn import *
+from .general import *
 
 
 def write_training_details(gameconfig, nn_config, fn):
@@ -22,8 +21,9 @@ def write_training_details(gameconfig, nn_config, fn):
     f.write("gameconfig = GameConfig(\n")
     for key in gameconfig_dict:
         f.write(f"\t{key}: {gameconfig_dict[key]},\n")
-    f.write("}")
+    f.write(")")
 
+    # Leave space
     f.write("\n")
 
     # Write nn_config

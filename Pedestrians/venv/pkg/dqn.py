@@ -90,7 +90,7 @@ class CNN:
         # Agents
         agent_pos_data = [None for _ in range(self.num_agents)]
         for agent, pos in enumerate(agent_pos):
-            agent_pos_data[agent] = float2mat_agent(pos, self.agent_size, self.env_size)
+            agent_pos_data[agent] = float2mat_agent(pos, self.env_size, self.agent_size)
         self.agent_pos_buffer.append(agent_pos_data)
 
         # Targets

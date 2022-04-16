@@ -131,7 +131,8 @@ class Window:
             for agent, pos in enumerate(agent_pos):
                 agent_pos_mat = float2mat_agent(pos, self.env_size, self.agent_size)
                 self.agent_array[agent_pos_mat>0] = self.colours[agent]
-            pygame.surfarray.blit_array(self.env_screen, self.agent_array)
+            agent_array_transposed = self.agent_array.transpose(1,0,2)
+            pygame.surfarray.blit_array(self.env_screen, agent_array_transposed)
         else:
             (caco_width, caco_height) = self.cacodemon_left.get_rect().size
             for agent, pos in enumerate(agent_pos):
@@ -313,7 +314,7 @@ class Window:
                     self.display_screen = pygame.display.set_mode(
                         (min(event.size) * 2, min(event.size)), DOUBLEBUF | RESIZABLE
                     )
-        # WHEN PAUSED
+        # WHEN PAUSED, CHECK FOR UNPAUSE AND NEXT FRAME
         while self.pause and not self.next_frame:
             for event in pygame.event.get():
                 if event.type == KEYUP:

@@ -1,9 +1,10 @@
-import pygame as pg
-import numpy as np
 import random
 
+import numpy as np
+import pygame as pg
+
 # create a 3D array with 30x30x3 (the last dimension is for the RGB color)
-cells = np.ndarray((30, 30, 3))
+cells_original = np.ndarray((4, 5, 3))
 
 # color dictionary, represents white, red and blue
 color_dict = {
@@ -13,10 +14,11 @@ color_dict = {
         }
 
 # pick a random color tuple from the color dict
-for i in range(cells.shape[0]):
-    for j in range(cells.shape[1]):
-        cells[i][j] = color_dict[random.randrange(3)]
-         
+for i in range(cells_original.shape[0]):
+    for j in range(cells_original.shape[1]):
+        cells_original[i][j] = color_dict[random.randrange(3)]
+cells = cells_original.transpose(1,0,2)
+
 # set the size of the screen as multiples of the array
 cellsize = 20
 WIDTH = cells.shape[0] * cellsize

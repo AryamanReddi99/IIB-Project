@@ -121,10 +121,7 @@ for game in tqdm(range(gameconfig.episodes)):
 
     # Display Data
     display_info = DisplayInfo(
-        agent_pos=[
-            float2pygame(agent_1, gameconfig.env_size),
-            float2pygame(agent_2, gameconfig.env_size),
-        ],
+        agent_pos=[agent_1, agent_2],
         target_pos=[
             float2pygame(target_1, gameconfig.env_size),
             float2pygame(target_2, gameconfig.env_size),
@@ -153,7 +150,7 @@ for game in tqdm(range(gameconfig.episodes)):
         action_list = cnn.act(game, done_list)
 
         # For testing collisions/targets
-        action_list = [4, 2]
+        #action_list = [4, 2]
 
         # Take Actions
         (
@@ -183,10 +180,7 @@ for game in tqdm(range(gameconfig.episodes)):
 
         # Display Data
         display_info = DisplayInfo(
-            agent_pos=[
-                float2pygame(agent_1, gameconfig.env_size),
-                float2pygame(agent_2, gameconfig.env_size),
-            ],
+            agent_pos=[agent_1, agent_2],
             target_pos=[
                 float2pygame(target_1, gameconfig.env_size),
                 float2pygame(target_2, gameconfig.env_size),
@@ -254,6 +248,10 @@ total_rewards_mock = [
     [round(sum(rewards_mock[agent][game]), 2) for game in range(gameconfig.episodes)]
     for agent in range(gameconfig.num_agents)
 ]  # for each agent, get a list of the total mock reward at the end of each game
+
+total_rewards_both = [sum(total_rewards_episode) for total_rewards_episode in (zip(*total_rewards))] # total rewards of each game of all agents
+total_rewards_both_mock = [sum(total_rewards_episode_mock) for total_rewards_episode_mock in (zip(*total_rewards_mock))] # total rewards of each game of all agents
+
 
 ## Save Diagnostics
 # Score Charts
