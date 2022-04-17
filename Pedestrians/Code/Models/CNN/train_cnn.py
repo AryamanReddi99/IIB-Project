@@ -11,6 +11,7 @@ from time import sleep
 import keras.backend as K
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
 
 # Import pkg
@@ -29,16 +30,12 @@ pp = PrettyPrinter(indent=4)
 # Data Paths
 fn = Path(__file__).stem  # this filename
 store_latest_model_fn = f"..{sep}Saved{sep}Latest"
-store_model_fn = (
-    f"..{sep}Saved{sep}"
-    + fn
-    + datetime.now().strftime("-%d-%m-%y_%H-%M")
-    + f"{sep}Model"
-)
-store_config_fn = store_model_fn + "_config.txt"
-store_img_fn = (
+store_folder = (
     f"..{sep}Saved{sep}" + fn + datetime.now().strftime("-%d-%m-%y_%H-%M") + f"{sep}"
 )
+store_model_fn = store_folder + "Model"
+store_config_fn = store_folder + "config.txt"
+store_df_fn = store_folder + "scores_df"
 load_model_fn = ""
 
 # Storage Triggers
@@ -150,7 +147,7 @@ for game in tqdm(range(gameconfig.episodes)):
         action_list = cnn.act(game, done_list)
 
         # For testing collisions/targets
-        #action_list = [4, 2]
+        # action_list = [4, 2]
 
         # Take Actions
         (
@@ -249,22 +246,20 @@ total_rewards_mock = [
     for agent in range(gameconfig.num_agents)
 ]  # for each agent, get a list of the total mock reward at the end of each game
 
-total_rewards_both = [sum(total_rewards_episode) for total_rewards_episode in (zip(*total_rewards))] # total rewards of each game of all agents
-total_rewards_both_mock = [sum(total_rewards_episode_mock) for total_rewards_episode_mock in (zip(*total_rewards_mock))] # total rewards of each game of all agents
-
-
-## Save Diagnostics
-# Score Charts
-plot_scores(total_rewards, store_img_fn + f"scores.jpg")
-plot_scores(total_rewards_mock, store_img_fn + f"scores_mock.jpg")
-
-# Model Learning Rate
-plot_single_attribute(
-    data=learning_rate,
-    fn=store_img_fn + f"learning_rate.jpg",
-    xlabel="Move",
-    ylabel="CNN Learning Rate",
-    title="CNN Learning Rate During Training",
+df_scores = pd.DataFrame(
+    {
+        "Agent 1 Scores": total_rewards[0],
+        "Agent 2 Scores": total_rewards[1],
+        "Agent 1 Mock Scores": total_rewards_mock[0],
+        "Agent 2 Mock Scores": total_rewards_mock[1],
+    }
 )
+df_scores["Cumulative Scores"] = (
+    df_scores["Agent 1 Scores"] + df_scores["Agent 2 Scores"]
+)
+df_scores["Cumulative Mock Scores"] = (
+    df_scores["Agent 1 Mock Scores"] + df_scores["Agent 2 Mock Scores"]
+)
+df_scores.to_pickle(store_df_fn)
 
 print("Finished")

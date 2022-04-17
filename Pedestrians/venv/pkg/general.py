@@ -11,6 +11,7 @@ def bound(low, high, value):
     """
     return max(low, min(high, value))
 
+
 def float2mat_agent(pos, env_size, agent_size):
     """
     Converts position in np.array x-y format into circlular shape in square matrix
@@ -28,7 +29,11 @@ def float2mat_agent(pos, env_size, agent_size):
             raise TypeError("position must be integer")
         # if outside bounds, all-0 matrix
         if x >= 0 and x <= env_size - 1 and y >= 0 and y <= env_size - 1:
-            mat = circle(shape=env_size, radius = agent_size, position=[(env_size - 1 - y)/place_idx, x/place_idx]).astype('uint8')
+            mat = circle(
+                shape=env_size,
+                radius=agent_size,
+                position=[(env_size - 1 - y) / place_idx, x / place_idx],
+            ).astype("uint8")
         else:
             mat = np.zeros([env_size, env_size])
     return mat
@@ -400,9 +405,9 @@ class GameConfig:
         self.num_actions = num_actions
         self.episodes = episodes
         self.max_episode_length = max_episode_length
-        self.reward_target=reward_target
-        self.reward_death=reward_death
-        self.reward_move=reward_move
+        self.reward_target = reward_target
+        self.reward_death = reward_death
+        self.reward_move = reward_move
 
         # Doom
         self.doom = doom

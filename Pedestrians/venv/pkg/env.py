@@ -29,7 +29,7 @@ class PedEnv:
         self.max_episode_length = gameconfig.max_episode_length
         self.reward_target = gameconfig.reward_target
         self.reward_death = gameconfig.reward_death
-        self.reward_move=gameconfig.reward_move
+        self.reward_move = gameconfig.reward_move
 
         # episode params
         self.done = 0
@@ -41,7 +41,7 @@ class PedEnv:
         pos1_mat = float2mat_agent(pos1, self.env_size, self.agent_size)
         pos2_mat = float2mat_agent(pos2, self.env_size, self.agent_size)
         # superpose agent images. If they overlap, they're in contact
-        if np.max(pos1_mat+pos2_mat) == 2:
+        if np.max(pos1_mat + pos2_mat) == 2:
             return True
         return False
 

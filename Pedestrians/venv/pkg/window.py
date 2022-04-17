@@ -4,6 +4,7 @@ import time
 
 import pygame
 import pygame.freetype
+
 # from win32api import GetSystemMetrics
 from pygame.locals import *
 
@@ -126,12 +127,12 @@ class Window:
     def _draw_agents(self, display_info):
         """Draw agents on env_screen"""
         agent_pos = display_info.agent_pos
-        self.agent_array[:,:] = self.black
+        self.agent_array[:, :] = self.black
         if not self.doom:
             for agent, pos in enumerate(agent_pos):
                 agent_pos_mat = float2mat_agent(pos, self.env_size, self.agent_size)
-                self.agent_array[agent_pos_mat>0] = self.colours[agent]
-            agent_array_transposed = self.agent_array.transpose(1,0,2)
+                self.agent_array[agent_pos_mat > 0] = self.colours[agent]
+            agent_array_transposed = self.agent_array.transpose(1, 0, 2)
             pygame.surfarray.blit_array(self.env_screen, agent_array_transposed)
         else:
             (caco_width, caco_height) = self.cacodemon_left.get_rect().size
@@ -442,12 +443,12 @@ def main():
         i += 1
         agent_pos = [
             [
-                random.randint(0, gameconfig.env_size-1),
-                random.randint(0, gameconfig.env_size-1),
+                random.randint(0, gameconfig.env_size - 1),
+                random.randint(0, gameconfig.env_size - 1),
             ],
             [
-                random.randint(0, gameconfig.env_size-1),
-                random.randint(0, gameconfig.env_size-1),
+                random.randint(0, gameconfig.env_size - 1),
+                random.randint(0, gameconfig.env_size - 1),
             ],
         ]
         target_pos = [
