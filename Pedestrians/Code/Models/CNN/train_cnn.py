@@ -29,13 +29,15 @@ pp = PrettyPrinter(indent=4)
 
 # Data Paths
 fn = Path(__file__).stem  # this filename
+log_id = fn + datetime.now().strftime(
+    "-%d-%m-%y_%H-%M"
+)  # unique identifier when running this script
 store_latest_model_fn = f"..{sep}Saved{sep}Latest"
-store_folder = (
-    f"..{sep}Saved{sep}" + fn + datetime.now().strftime("-%d-%m-%y_%H-%M") + f"{sep}"
-)
+store_folder = f"..{sep}Saved{sep}" + log_id + f"{sep}"
 store_model_fn = store_folder + "Model"
 store_config_fn = store_folder + "config.txt"
 store_df_fn = store_folder + "scores_df"
+tensorboard_log_dir = store_folder + f"tensorboard_log{sep}"
 load_model_fn = ""
 
 # Storage Triggers
@@ -73,6 +75,7 @@ nn_config = NNConfig(
     learning_rate=0.00001,
     tensorboard=False,
     target_model_iter=100,
+    log_dir=tensorboard_log_dir,
 )
 
 # Create Functional Classes
@@ -93,11 +96,12 @@ rewards_mock = [
     [] for _ in range(gameconfig.num_agents)
 ]  # mock environment rewards for each episode
 learning_rate = []  # learning rate of cnn over time
+model_mock_iter = 10  # how many episodes between mock tests
 best_cumulative_reward = -100  # score required for a model to get saved
 move_total = 0
 
 # Begin Training
-for game in tqdm(range(gameconfig.episodes)):
+for episode in tqdm(range(gameconfig.episodes)):
 
     # Reset Board
     stop_list = [
@@ -130,21 +134,21 @@ for game in tqdm(range(gameconfig.episodes)):
         reached_list=reached_list,
         breached_list=breached_list,
         done=done,
-        game=game,
+        episode=episode,
         move=0,
     )
     window.display(display_info=display_info)  # display info on pygame screen
 
     # Diagnostics
-    game_rewards = [
+    episode_rewards = [
         [] for _ in range(gameconfig.num_agents)
-    ]  # rewards for all agents for one game
+    ]  # rewards for all agents for one episode
 
-    # Play Game
+    # Play Episode
     for move in range(1, gameconfig.max_episode_length + 1):
 
         # Get CNN Actions
-        action_list = cnn.act(game, done_list)
+        action_list = cnn.act(episode, done_list)
 
         # For testing collisions/targets
         # action_list = [4, 2]
@@ -170,7 +174,7 @@ for game in tqdm(range(gameconfig.episodes)):
                 # Don't record experiences or rewards after agent is done
                 continue
             cnn.update_experiences(agent, action_list, reward_list, done_list)
-            game_rewards[agent].append(reward_list[agent])
+            episode_rewards[agent].append(reward_list[agent])
 
         # Train
         cnn.train(move_total)
@@ -189,7 +193,7 @@ for game in tqdm(range(gameconfig.episodes)):
             reached_list=reached_list,
             breached_list=breached_list,
             done=done,
-            game=game,
+            episode=episode,
             move=move,
         )
         window.display(display_info=display_info)  # display info on pygame screen
@@ -209,24 +213,25 @@ for game in tqdm(range(gameconfig.episodes)):
 
     ## Diagnostics
     # Mock environment
-    game_rewards_mock = mock_game_cnn(cnn, mock_env)
+    if episode % model_mock_iter == 0:
+        episode_rewards_mock = mock_episode_cnn(cnn, mock_env)
 
     # Rewards
     for agent in range(gameconfig.num_agents):
-        rewards[agent].append(game_rewards[agent])
-        rewards_mock[agent].append(game_rewards_mock[agent])
+        rewards[agent].append(episode_rewards[agent])
+        rewards_mock[agent].append(episode_rewards_mock[agent])
 
     # Save models where both agents reach targets and new mock reward highscore reached
-    game_total_reward_mock = sum(
-        [sum(agent_mock_rewards) for agent_mock_rewards in game_rewards_mock]
+    episode_total_reward_mock = sum(
+        [sum(agent_mock_rewards) for agent_mock_rewards in episode_rewards_mock]
     )
     if (
         all(env.reached_list)
-        and (game_total_reward_mock > best_cumulative_reward)
+        and (episode_total_reward_mock > best_cumulative_reward)
         and store_model
     ):
-        best_cumulative_reward = game_total_reward_mock
-        cnn.model.save(store_model_fn + f"_game_{game}")
+        best_cumulative_reward = episode_total_reward_mock
+        cnn.model.save(store_model_fn + f"_episode_{episode}")
         print(f"Model saved at {store_model_fn}")
 
 # Store Final Model and Configs
@@ -238,13 +243,13 @@ if store_model:
 
 # Diagnostics Post-Processing
 total_rewards = [
-    [round(sum(rewards[agent][game]), 2) for game in range(gameconfig.episodes)]
+    [round(sum(rewards[agent][episode]), 2) for episode in range(gameconfig.episodes)]
     for agent in range(gameconfig.num_agents)
-]  # for each agent, get a list of the total reward at the end of each game
+]  # for each agent, get a list of the total reward at the end of each episode
 total_rewards_mock = [
-    [round(sum(rewards_mock[agent][game]), 2) for game in range(gameconfig.episodes)]
+    [round(sum(rewards_mock[agent][episode]), 2) for episode in range(gameconfig.episodes)]
     for agent in range(gameconfig.num_agents)
-]  # for each agent, get a list of the total mock reward at the end of each game
+]  # for each agent, get a list of the total mock reward at the end of each episode
 
 df_scores = pd.DataFrame(
     {

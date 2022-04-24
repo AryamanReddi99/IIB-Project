@@ -193,7 +193,7 @@ class Window:
         reached_list = display_info.reached_list
         breached_list = display_info.breached_list
         # done = display_info.done
-        game = display_info.game
+        episode = display_info.episode
         move = display_info.move
 
         num_agents = len(collided_list)
@@ -217,8 +217,10 @@ class Window:
 
         ### Write normal game text
         ## Upper text
-        # Game + Move info
-        self.font.render_to(self.text_screen, (5, 5), "Game: " + str(game), self.white)
+        # Episode + Move info
+        self.font.render_to(
+            self.text_screen, (5, 5), "Episode: " + str(episode), self.white
+        )
         self.font.render_to(
             self.text_screen,
             (5, 5 + self.text_spacing),
@@ -399,7 +401,7 @@ class DisplayInfo:
         reached_list,
         breached_list,
         done,
-        game,
+        episode,
         move,
     ):
         self.agent_pos = agent_pos
@@ -411,7 +413,7 @@ class DisplayInfo:
         self.reached_list = reached_list
         self.breached_list = breached_list
         self.done = done
-        self.game = game
+        self.episode = episode
         self.move = move
 
 
@@ -472,7 +474,7 @@ def main():
             reached_list=[0, 0],
             breached_list=[0, 0],
             done=1,
-            game=1,
+            episode=1,
             move=0,
         )
         window.display(display_info=display_info)

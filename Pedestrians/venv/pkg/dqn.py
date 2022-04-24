@@ -49,6 +49,7 @@ class CNN:
         self.tensorboard = nn_config.tensorboard
         self.epochs = nn_config.epochs
         self.target_model_iter = nn_config.target_model_iter
+        self.log_dir = nn_config.log_dir
 
         ## Buffers
         # stores last 2 sets of agent positions
@@ -63,8 +64,7 @@ class CNN:
         self.replay_buffer = deque(maxlen=nn_config.mem_max_size)
 
         # Tensorboard
-        log_dir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
-        self.tensorboard_callback = TensorBoard(log_dir, histogram_freq=1)
+        self.tensorboard_callback = TensorBoard(self.log_dir, histogram_freq=1)
 
         # Metrics
         self.accuracy = []
@@ -113,7 +113,7 @@ class CNN:
         if len(self.agent_pos_buffer) > 1:
             self._update_state_buffer()
 
-    def act(self, game, done_list):
+    def act(self, episode, done_list):
         """
         Looks at positional data in buffer and creates action
         for each agent
@@ -124,7 +124,7 @@ class CNN:
             if done_list[agent]:
                 action = 0  # stop moving
             # explore
-            elif uniform(0, 1) < self._get_epsilon(game):
+            elif uniform(0, 1) < self._get_epsilon(episode):
                 action = self._action_space_sample()
             # exploit
             else:
@@ -303,20 +303,20 @@ class CNN:
         self.loss.append(loss)
         self.accuracy.append(accuracy)
 
-    def _get_epsilon(self, game):
+    def _get_epsilon(self, episode):
         """
         Returns epsilon (random move chance) as decaying e^-x with first
         frac_random*episodes totally random
 
-        game = current game number
+        episode = current episode number
         episodes = number of total episodes
         frac_random = fraction of episodes with epsilon = 1
         final_epsilon = epsilon after all episodes have been played
         min_epsilon = minimum val of epsilon
 
-        Use game=-1 to put it in testing mode
+        Use episode=-1 to put it in testing mode
         """
-        if (self.mode == "testing") or game == -1:
+        if (self.mode == "testing") or episode == -1:
             self.epsilon = 0
         else:
             self.epsilon = bound(
@@ -324,7 +324,7 @@ class CNN:
                 1,
                 self.final_epsilon
                 ** (
-                    (game - self.frac_random * self.episodes)
+                    (episode - self.frac_random * self.episodes)
                     / (self.episodes * (1 - self.frac_random))
                 ),
             )
@@ -359,6 +359,7 @@ class NNConfig:
         tensorboard=False,
         epochs=1,
         target_model_iter=10,
+        log_dir="logs/fit/",
     ):
 
         self.mode = mode

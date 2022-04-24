@@ -32,7 +32,7 @@ pg.surfarray.blit_array(surf, cells)
 # transform the surface to screen size
 surf = pg.transform.scale(surf, (WIDTH, HEIGHT))
 
-# game loop
+# episode loop
 running = True
 while running:
     clock.tick(60)

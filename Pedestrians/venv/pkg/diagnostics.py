@@ -49,7 +49,7 @@ def plot_scores(scores, fn):
     fig = plt.figure()
     for agent, agent_scores in enumerate(scores):
         plt.plot(episodes, agent_scores, label=f"Agent {agent}")
-    plt.xlabel("Game")
+    plt.xlabel("Episode")
     plt.ylabel("Cumulative Reward")
     plt.title("Agent Scores during Training")
     plt.legend()
@@ -70,8 +70,8 @@ def plot_single_attribute(data, fn, xlabel, ylabel, title):
     fig.savefig(fn)
 
 
-def mock_game_cnn(cnn, mock_env):
-    """Plays a model in a mock_env for one game to see how it fares"""
+def mock_episode_cnn(cnn, mock_env):
+    """Plays a model in a mock_env for one episode to see how it fares"""
     # Reset Board
     stop_list = [False for _ in range(mock_env.num_agents)]  # stop recording rewards
     (
@@ -88,13 +88,13 @@ def mock_game_cnn(cnn, mock_env):
     cnn.update_pos_buffers([agent_1, agent_2], [target_1, target_2])  # padded memory
 
     # Diagnostics
-    game_rewards = [[] for _ in range(mock_env.num_agents)]
+    episode_rewards = [[] for _ in range(mock_env.num_agents)]
 
-    # Play Game
+    # Play Episode
     for move in range(0, mock_env.max_episode_length):
 
         # Get CNN Actions
-        action_list = cnn.act(game=-1, done_list=done_list)
+        action_list = cnn.act(episode=-1, done_list=done_list)
 
         # Take Actions
         (
@@ -116,13 +116,13 @@ def mock_game_cnn(cnn, mock_env):
             if stop_list[agent]:
                 # Don't record rewards after agent is done
                 continue
-            game_rewards[agent].append(reward_list[agent])
+            episode_rewards[agent].append(reward_list[agent])
 
         # Stop list is done list lagged by 1
         stop_list = np.copy(done_list)
         if done:
             break
-    return game_rewards
+    return episode_rewards
 
 
 def main():

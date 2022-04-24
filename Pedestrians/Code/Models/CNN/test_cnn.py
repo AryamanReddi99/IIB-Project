@@ -73,14 +73,14 @@ cnn = CNN(gameconfig, nn_config)
 # Get Model
 cnn.load_cnn(load_model_fn)
 
-# Game Parameters
+# Episode Parameters
 max_episode_length = 50
 
 ### Diagnostics
 total_rewards = []
 
 # Begin Testing
-for game in tqdm(range(gameconfig.episodes)):
+for episode in tqdm(range(gameconfig.episodes)):
     # Reset Board
     stop_list = [
         False for _ in range(gameconfig.num_agents)
@@ -115,7 +115,7 @@ for game in tqdm(range(gameconfig.episodes)):
         reached_list=reached_list,
         breached_list=breached_list,
         done=done,
-        game=game,
+        episode=episode,
         move=0,
     )
     window.display(display_info=display_info)  # display info on pygame screen
@@ -123,11 +123,11 @@ for game in tqdm(range(gameconfig.episodes)):
     ### Diagnostics
     total_reward = 0
 
-    # Play Game
+    # Play Episode
     for move in range(1, max_episode_length):
 
         # Get CNN Actions
-        action_list = cnn.act(game, done_list)
+        action_list = cnn.act(episode, done_list)
 
         # For testing collisions/targets
         # action_list = [cnn._action_space_sample(),cnn._action_space_sample()]
@@ -164,7 +164,7 @@ for game in tqdm(range(gameconfig.episodes)):
             reached_list=reached_list,
             breached_list=breached_list,
             done=done,
-            game=game,
+            episode=episode,
             move=move,
         )
         window.display(display_info=display_info)  # display info on pygame screen
