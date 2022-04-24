@@ -374,6 +374,7 @@ class NNConfig:
         self.tensorboard = tensorboard
         self.epochs = epochs
         self.target_model_iter = target_model_iter
+        self.log_dir = log_dir
 
 
 ################################# External Functions/Classes ##############################
